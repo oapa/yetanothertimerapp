@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yetanothertimerapp/components/TimerList.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
-// final timerListProvider = ChangeNotifierProvider<TimerMap>((ref) {
-//   UniqueKey timer1Key = UniqueKey();
-//   UniqueKey timer2Key = UniqueKey();
-//   return TimerMap({
-//     timer1Key: TimerNotifier(timer1Key, 10, TimerState.initial),
-//     timer2Key: TimerNotifier(timer2Key, 13, TimerState.initial)
-//   });
-// });
+final timerListProvider = ChangeNotifierProvider<TimerMap>((ref) {
+  UniqueKey timer1Key = UniqueKey();
+  UniqueKey timer2Key = UniqueKey();
+  return TimerMap({
+    timer1Key: TimerNotifier(timer1Key, 10, TimerState.initial),
+    timer2Key: TimerNotifier(timer2Key, 13, TimerState.initial)
+  });
+});
 
 // final _timerListProvider = StateNotifierProvider<TimerList>((ref) {
 //   UniqueKey timer1Key = UniqueKey();
@@ -21,30 +21,43 @@ import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 //   ]);
 // });
 
-final timerListProvider = ChangeNotifierProvider<TimerList>((ref) {
-  UniqueKey timer1Key = UniqueKey();
-  UniqueKey timer2Key = UniqueKey();
-  return TimerList([
-    TimerNotifier(timer1Key, 10, TimerState.initial),
-    TimerNotifier(timer2Key, 13, TimerState.initial)
-  ]);
-});
+// final timerListProvider = ChangeNotifierProvider<TimerList>((ref) {
+//   UniqueKey timer1Key = UniqueKey();
+//   UniqueKey timer2Key = UniqueKey();
+//   return TimerList([
+//     TimerNotifier(timer1Key, 10, TimerState.initial),
+//     TimerNotifier(timer2Key, 13, TimerState.initial)
+//   ]);
+// });
 
 // final timerListProvider = ChangeNotifierProvider<TimerList>((ref) {
 //   return ref.watch(_timerListProvider);
 // });
 
-final _allTimers = Provider<List<TimerNotifier>>((ref) {
-  return ref.watch(timerListProvider).timerList;
+// final _allTimers = Provider<List<TimerNotifier>>((ref) {
+//   return ref.watch(timerListProvider).timerList;
+// });
+
+// final allTimers = Provider<List<TimerNotifier>>((ref) {
+//   return ref.watch(_allTimers);
+// });
+
+// final _timerNotifierProvider =
+//     StateNotifierProvider.family<TimerNotifier, UniqueKey>((ref, id) {
+//   return ref.watch(allTimers).where((t) => t.id == id).first;
+// });
+
+final _allTimers = Provider<Map<UniqueKey, TimerNotifier>>((ref) {
+  return ref.watch(timerListProvider).timerMap;
 });
 
-final allTimers = Provider<List<TimerNotifier>>((ref) {
+final allTimers = Provider<Map<UniqueKey, TimerNotifier>>((ref) {
   return ref.watch(_allTimers);
 });
 
 final _timerNotifierProvider =
     StateNotifierProvider.family<TimerNotifier, UniqueKey>((ref, id) {
-  return ref.watch(allTimers).where((t) => t.id == id).first;
+  return ref.watch(allTimers)[id];
 });
 
 final timerNotifierProvider =
@@ -93,8 +106,10 @@ class Dashboard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    final List<TimerNotifier> allTimersList =
-        watch(timerListProvider).timerList;
+    // final List<TimerNotifier> allTimersList =
+    //     watch(timerListProvider).timerList;
+    final Map<UniqueKey, TimerNotifier> allTimersList =
+        watch(timerListProvider).timerMap;
     final newTimerController = TextEditingController();
 
     return Scaffold(
@@ -127,26 +142,26 @@ class Dashboard extends ConsumerWidget {
                 ),
               ],
             ),
-            // allTimersList.forEach((t) {
-            //   return Dismissible(
-            //     key: ValueKey(t.id),
-            //     onDismissed: (_) {
-            //       context.read(_timerListProvider).remove(t.id);
-            //       print("removed ${t.id}");
-            //       print("all timers is now $allTimers");
-            //     },
-            //     child: TimerItem(t.id),
-            //   );
-            // }).toList(),
-            for (var i = 0; i < allTimersList.length; i++) ...[
-              Dismissible(
-                key: ValueKey(allTimersList[i].id),
+            ...allTimersList.entries.map((t) {
+              return Dismissible(
+                key: ValueKey(t.key),
                 onDismissed: (_) {
-                  context.read(timerListProvider).remove(allTimersList[i].id);
+                  context.read(timerListProvider).remove(t.key);
+                  print("removed ${t.key}");
+                  print("all timers is now $allTimers");
                 },
-                child: TimerItem(allTimersList[i].id),
-              )
-            ]
+                child: TimerItem(t.key),
+              );
+            }).toList(),
+            // for (var i = 0; i < allTimersList.length; i++) ...[
+            //   Dismissible(
+            //     key: ValueKey(allTimersList[i].id),
+            //     onDismissed: (_) {
+            //       context.read(timerListProvider).remove(allTimersList[i].id);
+            //     },
+            //     child: TimerItem(allTimersList[i].id),
+            //   )
+            // ]
           ]),
     );
   }
