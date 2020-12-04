@@ -6,6 +6,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
   UniqueKey id;
   int initialDuration;
   TimerState timerState;
+  DateTime eta;
 
   TimerNotifier(this.id, this.initialDuration, this.timerState)
       : super(TimerModel(initialDuration, TimerState.initial));
@@ -31,7 +32,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     state = TimerModel(initialDuration, TimerState.started);
     tickerSubscription = ticker.tick(ticks: initialDuration).listen((duration) {
       // timeRemaining = duration;
-      print("${duration}s remaining");
+      // print("${duration}s remaining");
       state = TimerModel(duration, TimerState.started);
     });
 
