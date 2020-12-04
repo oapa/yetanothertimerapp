@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:yetanothertimerapp/screens/Home.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yetanothertimerapp/screens/Dashboard.dart';
 
 void main() {
-  runApp(YetAnotherTimerApp());
+  runApp(
+    const ProviderScope(child: YetAnotherTimerApp()),
+  );
 }
 
 class YetAnotherTimerApp extends StatelessWidget {
+  const YetAnotherTimerApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Yet Another Timer App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: YATAHomePage(title: 'Timers Dashboard'),
+      // theme: ThemeData(
+      //   primarySwatch: Colors.blue,
+      // ),
+      home: Dashboard(title: 'Timers Dashboard'),
     );
   }
 }
