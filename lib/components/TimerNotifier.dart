@@ -15,22 +15,9 @@ class TimerNotifier extends StateNotifier<TimerModel> {
   StreamSubscription<int> tickerSubscription;
 
   void startTimer() {
-    if (state.timerState == TimerState.paused) {
-      _restartTimer();
-    } else {
-      _startTimer();
-    }
-  }
-
-  void _restartTimer() {
-    tickerSubscription?.resume();
-    state.timerState = TimerState.started;
-  }
-
-  void _startTimer() {
     tickerSubscription?.cancel();
-    state = TimerModel(initialDuration, TimerState.started);
-    tickerSubscription = ticker.tick(ticks: initialDuration).listen((duration) {
+    tickerSubscription =
+        ticker.tick(ticks: state.timeRemaining).listen((duration) {
       // print("${duration}s remaining");
       state = TimerModel(duration, TimerState.started);
     });
@@ -38,12 +25,10 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     tickerSubscription?.onDone(() {
       state = TimerModel(state.timeRemaining, TimerState.finished);
     });
-
-    state.timerState = TimerState.started;
   }
 
   void pauseTimer() {
-    tickerSubscription?.pause();
+    tickerSubscription?.cancel();
     state = TimerModel(state.timeRemaining, TimerState.paused);
   }
 
@@ -54,21 +39,9 @@ class TimerNotifier extends StateNotifier<TimerModel> {
 
   @override
   void dispose() {
-    print("****timer was disposed");
+    print("****timer $id was disposed");
     tickerSubscription?.cancel();
     super.dispose();
-  }
-
-  static String formattedDuration(int duration) {
-    final minutes = ((duration / 60) % 60).floor().toString().padLeft(2, '0');
-    final seconds = (duration % 60).floor().toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
-  static String formattedTime(DateTime timestamp) {
-    return "${timestamp?.hour}:"
-        "${timestamp?.minute.toString().padLeft(2, "0")}:"
-        "${timestamp?.second.toString().padLeft(2, "0")}";
   }
 }
 

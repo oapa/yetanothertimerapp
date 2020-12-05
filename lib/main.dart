@@ -15,9 +15,6 @@ class YetAnotherTimerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Yet Another Timer App',
-      // theme: ThemeData(
-      //   primarySwatch: Colors.blue,
-      // ),
       home: Dashboard(title: 'Timers Dashboard'),
     );
   }
