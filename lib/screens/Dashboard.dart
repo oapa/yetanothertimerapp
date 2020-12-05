@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:yetanothertimerapp/components/TimerList.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
@@ -7,8 +8,8 @@ final timerListProvider = ChangeNotifierProvider<TimerMap>((ref) {
   UniqueKey timer1Key = UniqueKey();
   UniqueKey timer2Key = UniqueKey();
   return TimerMap({
-    timer1Key: TimerNotifier(timer1Key, 10, TimerState.initial),
-    timer2Key: TimerNotifier(timer2Key, 13, TimerState.initial)
+    timer1Key: TimerNotifier(timer1Key, 20, TimerState.initial),
+    timer2Key: TimerNotifier(timer2Key, 45, TimerState.initial)
   });
 });
 
@@ -150,81 +151,81 @@ class TimerListWidget extends ConsumerWidget {
   }
 }
 
-class TimerItem extends ConsumerWidget {
+class TimerItem extends StatelessWidget {
   final UniqueKey id;
-  TimerItem(this.id, {Key key}) : super(key: key);
+  const TimerItem(this.id, {Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print('building $id TimerTextWidget');
+    return
+        // Row(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        TimerCircularAnimation(id)
+        // ])
+        ;
+  }
+}
+
+class TimerCircularAnimation extends ConsumerWidget {
+  final UniqueKey id;
+  TimerCircularAnimation(this.id, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    TimerNotifier timer = watch(timerNotifierProvider(id));
+    print("building TimerCircularAnimation for $id");
+    int initialDuration =
+        context.read(timerNotifierProvider(id)).initialDuration;
     int timeRemaining = watch(timeRemainingProvider(id));
     TimerState timerState = watch(timerStateProvider(id));
-    // print("$timeRemaining timeRemaining for $id");
-    // print("$timerState timerState for $id");
-
-    print(
-        'building $id TimerTextWidget: $timerState, ${timeRemaining}s remaining');
-    return Row(children: [
-      // TimerButtonsContainer(timerState),
-      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        if (timerState == TimerState.initial) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.startTimer();
-            },
-            child: Icon(Icons.play_arrow),
-          ),
-        ],
-        if (timerState == TimerState.started) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.pauseTimer();
-            },
-            child: Icon(Icons.pause),
-          ),
-          SizedBox(
-            width: 20,
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              timer.resetTimer();
-            },
-            child: Icon(Icons.replay),
-          ),
-        ],
-        if (timerState == TimerState.paused) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.startTimer();
-            },
-            child: Icon(Icons.play_arrow),
-          ),
-          SizedBox(
-            width: 20,
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              timer.resetTimer();
-            },
-            child: Icon(Icons.replay),
-          ),
-        ],
-        if (timerState == TimerState.finished) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.resetTimer();
-            },
-            child: Icon(Icons.replay),
-          ),
-        ],
-        SizedBox(
-          width: 20,
+    return Stack(children: [
+      Container(
+        width: 200,
+        height: 200,
+        child: CircularPercentIndicator(
+          radius: 150,
+          lineWidth: 10,
+          percent: (initialDuration - timeRemaining) / initialDuration,
+          center: Container(
+              margin: EdgeInsets.all(20.0),
+              // decoration: BoxDecoration(shape: BoxShape.circle),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('$timeRemaining/$initialDuration',
+                        style: Theme.of(context).textTheme.headline5),
+                    // SizedBox(height: 5),
+                    // TimerButtonsContainer(id)
+                  ])),
+          progressColor: Theme.of(context).accentColor,
+          circularStrokeCap: CircularStrokeCap.round,
         ),
-        Text(
-          '$timeRemaining',
-          style: Theme.of(context).textTheme.headline2,
+      ),
+      if (timerState == TimerState.started)
+        Positioned(
+          bottom: 0,
+          left: 0,
+          child: Container(
+            child: PauseButton(id),
+          ),
         ),
-      ])
+      if (timerState != TimerState.started)
+        Positioned(
+          bottom: 0,
+          left: 0,
+          child: Container(
+            child: StartButton(id),
+          ),
+        ),
+      if (timerState != TimerState.initial)
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            child: ResetButton(id),
+          ),
+        )
     ]);
   }
 }
@@ -235,113 +236,76 @@ class TimerButtonsContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    TimerNotifier timer = watch(timerNotifierProvider(id));
-    int timeRemaining = watch(timeRemainingProvider(id));
+    print('building TimerButtonsContainer for $id');
     TimerState timerState = watch(timerStateProvider(id));
-    print("$timeRemaining timeRemaining for $id");
-    print("$timerState timerState for $id");
 
-    print('building TimerTextWidget $timeRemaining');
-    return Row(children: [
-      // TimerButtonsContainer(timerState),
-      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        if (timerState == TimerState.initial) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.startTimer();
-            },
-            child: Icon(Icons.play_arrow),
-          ),
-        ],
-        if (timerState == TimerState.started) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.pauseTimer();
-            },
-            child: Icon(Icons.pause),
-          ),
-          SizedBox(
-            width: 20,
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              timer.resetTimer();
-            },
-            child: Icon(Icons.replay),
-          ),
-        ],
-        if (timerState == TimerState.paused) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.startTimer();
-            },
-            child: Icon(Icons.play_arrow),
-          ),
-          SizedBox(
-            width: 20,
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              timer.resetTimer();
-            },
-            child: Icon(Icons.replay),
-          ),
-        ],
-        if (timerState == TimerState.finished) ...[
-          FloatingActionButton(
-            onPressed: () {
-              timer.resetTimer();
-            },
-            child: Icon(Icons.replay),
-          ),
-        ],
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      if (timerState == TimerState.initial) ...[
+        StartButton(id),
+      ],
+      if (timerState == TimerState.started) ...[
+        PauseButton(id),
         SizedBox(
-          width: 20,
+          width: 5,
         ),
-        Text(
-          '$timeRemaining',
-          style: Theme.of(context).textTheme.headline2,
+        ResetButton(id),
+      ],
+      if (timerState == TimerState.paused) ...[
+        StartButton(id),
+        SizedBox(
+          width: 5,
         ),
-      ])
+        ResetButton(id),
+      ],
+      if (timerState == TimerState.finished) ...[ResetButton(id)],
+      SizedBox(
+        width: 5,
+      ),
     ]);
   }
 }
 
-// class StartButton extends StatelessWidget {
-//   const StartButton({Key key}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return FloatingActionButton(
-//       onPressed: () {
-//         context.read(_currentTimer).startTimer();
-//       },
-//       child: Icon(Icons.play_arrow),
-//     );
-//   }
-// }
+class StartButton extends StatelessWidget {
+  final UniqueKey id;
+  const StartButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        context.read(timerNotifierProvider(id)).startTimer();
+      },
+      child: Icon(Icons.play_arrow),
+      mini: true,
+    );
+  }
+}
 
-// class PauseButton extends StatelessWidget {
-//   const PauseButton({Key key}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return FloatingActionButton(
-//       onPressed: () {
-//         context.read(_currentTimer).pauseTimer();
-//       },
-//       child: Icon(Icons.pause),
-//     );
-//   }
-// }
+class PauseButton extends StatelessWidget {
+  final UniqueKey id;
+  const PauseButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        context.read(timerNotifierProvider(id)).pauseTimer();
+      },
+      child: Icon(Icons.pause),
+      mini: true,
+    );
+  }
+}
 
-// class ResetButton extends StatelessWidget {
-//   const ResetButton({Key key}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return FloatingActionButton(
-//       onPressed: () {
-//         context.read(_currentTimer).resetTimer();
-//       },
-//       child: Icon(Icons.replay),
-//     );
-//   }
-// }
+class ResetButton extends StatelessWidget {
+  final UniqueKey id;
+  const ResetButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        context.read(timerNotifierProvider(id)).resetTimer();
+      },
+      child: Icon(Icons.replay),
+      mini: true,
+    );
+  }
+}

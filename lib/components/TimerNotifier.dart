@@ -31,12 +31,11 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     tickerSubscription?.cancel();
     state = TimerModel(initialDuration, TimerState.started);
     tickerSubscription = ticker.tick(ticks: initialDuration).listen((duration) {
-      // timeRemaining = duration;
       // print("${duration}s remaining");
       state = TimerModel(duration, TimerState.started);
     });
 
-    tickerSubscription.onDone(() {
+    tickerSubscription?.onDone(() {
       state = TimerModel(state.timeRemaining, TimerState.finished);
     });
 
@@ -71,32 +70,10 @@ class TimerNotifier extends StateNotifier<TimerModel> {
         "${timestamp?.minute.toString().padLeft(2, "0")}:"
         "${timestamp?.second.toString().padLeft(2, "0")}";
   }
-
-  String timerStatus() {
-    switch (state.timerState) {
-      case TimerState.initial:
-        {
-          return "Time created";
-        }
-      case TimerState.started:
-        {
-          return "Timer started";
-        }
-      case TimerState.paused:
-        {
-          return "Timer paused";
-        }
-      case TimerState.finished:
-        {
-          return "Timer finished";
-        }
-    }
-    return "Unknown status of timer";
-  }
 }
 
 class Ticker {
-  Stream<int> tick({int ticks}) {
+  Stream<int> tick({int ticks = 0}) {
     return Stream.periodic(
       Duration(seconds: 1),
       (x) => ticks - x - 1,
@@ -117,82 +94,3 @@ class TimerModel {
 
   TimerModel(this.timeRemaining, this.timerState);
 }
-
-// class TimerButtonsContainer extends StatelessWidget {
-//   final UniqueKey uniqueKey;
-//   final TimerState timerState;
-//   const TimerButtonsContainer({Key key, this.uniqueKey, this.timerState})
-//       : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     print('building TimerButtonsContainer');
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.center,
-//       children: [
-//         if (timerState == TimerState.initial) ...[
-//           StartButton(uniqueKey: uniqueKey),
-//         ],
-//         if (timerState == TimerState.started) ...[
-//           PauseButton(uniqueKey: uniqueKey),
-//           SizedBox(
-//             width: 20,
-//           ),
-//           ResetButton(uniqueKey: uniqueKey),
-//         ],
-//         if (timerState == TimerState.paused) ...[
-//           StartButton(uniqueKey: uniqueKey),
-//           SizedBox(
-//             width: 20,
-//           ),
-//           ResetButton(uniqueKey: uniqueKey),
-//         ],
-//         if (timerState == TimerState.finished) ...[
-//           ResetButton(uniqueKey: uniqueKey),
-//         ]
-//       ],
-//     );
-//   }
-// }
-
-// class StartButton extends StatelessWidget {
-//   final UniqueKey uniqueKey;
-//   const StartButton({Key key, this.uniqueKey}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return FloatingActionButton(
-//       onPressed: () {
-//         print("start button pressed for $uniqueKey");
-//         context.read(timerProvider(uniqueKey)).startTimer();
-//       },
-//       child: Icon(Icons.play_arrow),
-//     );
-//   }
-// }
-
-// class PauseButton extends StatelessWidget {
-//   const PauseButton({Key key}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return FloatingActionButton(
-//       onPressed: () {
-//         context.read(timerProvider()).pauseTimer();
-//       },
-//       child: Icon(Icons.pause),
-//     );
-//   }
-// }
-
-// class ResetButton extends StatelessWidget {
-//   final UniqueKey uniqueKey;
-//   const ResetButton({Key key, this.uniqueKey}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return FloatingActionButton(
-//       onPressed: () {
-//         context.read(timerProvider(uniqueKey)).resetTimer();
-//       },
-//       child: Icon(Icons.replay),
-//     );
-//   }
-// }
