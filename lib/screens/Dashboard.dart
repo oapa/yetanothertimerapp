@@ -174,93 +174,63 @@ class TimerCircularAnimation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    print("building TimerCircularAnimation for $id");
+    print("building TimerCircularWidget for $id");
     int initialDuration =
         context.read(timerNotifierProvider(id)).initialDuration;
-    int timeRemaining = watch(timeRemainingProvider(id));
-    TimerState timerState = watch(timerStateProvider(id));
     return Stack(children: [
       Container(
         width: 200,
         height: 200,
-        child: CircularPercentIndicator(
-          radius: 150,
-          lineWidth: 10,
-          percent: (initialDuration - timeRemaining) / initialDuration,
-          center: Container(
-              margin: EdgeInsets.all(20.0),
-              // decoration: BoxDecoration(shape: BoxShape.circle),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('$timeRemaining/$initialDuration',
-                        style: Theme.of(context).textTheme.headline5),
-                    // SizedBox(height: 5),
-                    // TimerButtonsContainer(id)
-                  ])),
-          progressColor: Theme.of(context).accentColor,
-          circularStrokeCap: CircularStrokeCap.round,
-        ),
+        child: Consumer(builder: (context, watch, child) {
+          int timeRemaining = watch(timeRemainingProvider(id));
+          print(
+              "building CircularAnimation for $id with ${timeRemaining}s left");
+          return CircularPercentIndicator(
+            radius: 150,
+            lineWidth: 10,
+            percent: (initialDuration - timeRemaining) / initialDuration,
+            center: Container(
+                margin: EdgeInsets.all(20.0),
+                // decoration: BoxDecoration(shape: BoxShape.circle),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('$timeRemaining/$initialDuration',
+                          style: Theme.of(context).textTheme.headline5),
+                    ])),
+            progressColor: Theme.of(context).accentColor,
+            circularStrokeCap: CircularStrokeCap.round,
+          );
+        }),
       ),
-      if (timerState == TimerState.started)
-        Positioned(
-          bottom: 0,
-          left: 0,
-          child: Container(
-            child: PauseButton(id),
-          ),
+      Consumer(builder: (context, watch, child) {
+        print("building Play/Pause button for $id");
+        TimerState timerState = watch(timerStateProvider(id));
+        if (timerState == TimerState.started) {
+          return Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              child: PauseButton(id),
+            ),
+          );
+        } else {
+          return Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              child: StartButton(id),
+            ),
+          );
+        }
+      }),
+      Positioned(
+        bottom: 0,
+        right: 0,
+        child: Container(
+          child: ResetButton(id),
         ),
-      if (timerState != TimerState.started)
-        Positioned(
-          bottom: 0,
-          left: 0,
-          child: Container(
-            child: StartButton(id),
-          ),
-        ),
-      if (timerState != TimerState.initial)
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            child: ResetButton(id),
-          ),
-        )
-    ]);
-  }
-}
-
-class TimerButtonsContainer extends ConsumerWidget {
-  final UniqueKey id;
-  TimerButtonsContainer(this.id, {Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    print('building TimerButtonsContainer for $id');
-    TimerState timerState = watch(timerStateProvider(id));
-
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      if (timerState == TimerState.initial) ...[
-        StartButton(id),
-      ],
-      if (timerState == TimerState.started) ...[
-        PauseButton(id),
-        SizedBox(
-          width: 5,
-        ),
-        ResetButton(id),
-      ],
-      if (timerState == TimerState.paused) ...[
-        StartButton(id),
-        SizedBox(
-          width: 5,
-        ),
-        ResetButton(id),
-      ],
-      if (timerState == TimerState.finished) ...[ResetButton(id)],
-      SizedBox(
-        width: 5,
-      ),
+      )
     ]);
   }
 }
