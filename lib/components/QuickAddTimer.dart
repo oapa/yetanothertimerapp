@@ -24,26 +24,27 @@ class QuickAddTimerState extends State<QuickAddTimer> {
     return SliverPersistentHeader(
       pinned: true,
       delegate: SliverAppBarDelegate(
-        minHeight: 120.0,
-        maxHeight: 120.0,
+        minHeight: 75.0,
+        maxHeight: 75.0,
         child: Container(
           color: Colors.blue[50],
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+          padding: EdgeInsets.fromLTRB(15, 20, 20, 15),
           child: Center(
             child: Form(
               key: _formKey,
               child: FocusScope(
                 node: _node,
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Expanded(
+                    Container(
+                      width: 60,
                       child: TextFormField(
                         controller: hourEntryController,
-                        maxLength: 2,
-                        maxLengthEnforced: true,
+                        // maxLength: 2,
+                        // maxLengthEnforced: true,
                         decoration: const InputDecoration(
-                          labelText: 'Hours',
+                          labelText: 'hr',
                           border: OutlineInputBorder(),
                           // errorText: validationService.hours.error;
                         ),
@@ -59,13 +60,15 @@ class QuickAddTimerState extends State<QuickAddTimer> {
                         onFieldSubmitted: (value) => createNewTimer(value),
                       ),
                     ),
-                    Expanded(
+                    SizedBox(width: 10),
+                    Container(
+                      width: 60,
                       child: TextFormField(
                         controller: minuteEntryController,
-                        maxLength: 2,
-                        maxLengthEnforced: true,
+                        // maxLength: 2,
+                        // maxLengthEnforced: true,
                         decoration: const InputDecoration(
-                          labelText: 'Minutes',
+                          labelText: 'min',
                           border: OutlineInputBorder(),
                           // errorText: validationService.hours.error;
                         ),
@@ -81,13 +84,15 @@ class QuickAddTimerState extends State<QuickAddTimer> {
                         onFieldSubmitted: (value) => createNewTimer(value),
                       ),
                     ),
-                    Expanded(
+                    SizedBox(width: 10),
+                    Container(
+                      width: 60,
                       child: TextFormField(
                         controller: secondsEntryController,
-                        maxLength: 2,
-                        maxLengthEnforced: true,
+                        // maxLength: 2,
+                        // maxLengthEnforced: true,
                         decoration: const InputDecoration(
-                          labelText: 'Seconds',
+                          labelText: 'sec',
                           border: OutlineInputBorder(),
                           // errorText: validationService.hours.error;
                         ),
@@ -102,13 +107,17 @@ class QuickAddTimerState extends State<QuickAddTimer> {
                         onFieldSubmitted: (value) => createNewTimer(value),
                       ),
                     ),
-                    Expanded(
+                    SizedBox(width: 20),
+                    Container(
+                      width: 50,
                       child: Center(
-                        child: FloatingActionButton(
-                          child: Icon(Icons.add, size: 50),
+                        child: RaisedButton(
+                          child: Text("ADD"),
                           onPressed: () {
                             createNewTimerButton();
                           },
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
                         ),
                       ),
                     ),
@@ -155,14 +164,15 @@ class QuickAddTimerState extends State<QuickAddTimer> {
 
   String validateHours(String value) {
     int intValue = int.tryParse(value);
-    if (intValue != null || value == null) {
-      // _node.nextFocus();
+    if (intValue != null) {
       return null;
-    } else if (minuteEntryController.text != null ||
-        secondsEntryController.text != null) {
+    } else if (minuteEntryController.text.length > 0 ||
+        secondsEntryController.text.length > 0) {
+      print(
+          "no hours found, but found ${minuteEntryController.text} and ${secondsEntryController.text}");
       return null;
     } else {
-      return "Enter as int";
+      return "Enter an int";
     }
   }
 
@@ -170,11 +180,11 @@ class QuickAddTimerState extends State<QuickAddTimer> {
     int intValue = int.tryParse(value);
     if (intValue != null) {
       return null;
-    } else if (hourEntryController.text != null ||
-        secondsEntryController.text != null) {
+    } else if (hourEntryController.text.length > 0 ||
+        secondsEntryController.text.length > 0) {
       return null;
     } else {
-      return "Enter as int";
+      return "Enter an int";
     }
   }
 
@@ -182,11 +192,11 @@ class QuickAddTimerState extends State<QuickAddTimer> {
     int intValue = int.tryParse(value);
     if (intValue != null) {
       return null;
-    } else if (hourEntryController.text != null ||
-        minuteEntryController.text != null) {
+    } else if (hourEntryController.text.length > 0 ||
+        minuteEntryController.text.length > 0) {
       return null;
     } else {
-      return "Enter as int";
+      return "Enter an int";
     }
   }
 }
