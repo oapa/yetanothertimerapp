@@ -7,6 +7,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
   int initialDuration;
   TimerState timerState;
   DateTime eta;
+  DateTime startTime;
 
   TimerNotifier(this.id, this.initialDuration, this.timerState)
       : super(TimerModel(initialDuration, TimerState.initial));
@@ -16,6 +17,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
 
   void startTimer() {
     tickerSubscription?.cancel();
+    eta = DateTime.now().add(Duration(seconds: state.timeRemaining));
     tickerSubscription =
         ticker.tick(ticks: state.timeRemaining).listen((duration) {
       // print("${duration}s remaining");

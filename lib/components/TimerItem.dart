@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -11,131 +12,166 @@ class TimerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('building $id TimerTextWidget');
-    return TimerCircularAnimation(id);
+    return Stack(alignment: Alignment.center, children: [
+      TimerCircularAnimation(id),
+      StartPauseButton(id),
+      ResetButton(id),
+    ]);
   }
 }
 
-class TimerCircularAnimation extends StatelessWidget {
+class TimerCircularAnimation extends ConsumerWidget {
   final UniqueKey id;
   const TimerCircularAnimation(this.id, {Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    print("building TimerCircularWidget for $id");
+  Widget build(BuildContext context, ScopedReader watch) {
     int initialDuration =
         context.read(timerNotifierProvider(id)).initialDuration;
-    return Container(
-        width: 250.0,
-        height: 250.0,
-        margin: EdgeInsets.all(10.0),
-        child: Stack(alignment: Alignment.center, children: [
-          Consumer(builder: (context, watch, child) {
-            int timeRemaining = watch(timeRemainingProvider(id));
-            DateTime eta = DateTime.now().add(Duration(seconds: timeRemaining));
-            print(
-                "building CircularAnimation for $id with ${timeRemaining}s left");
-            return CircularPercentIndicator(
-              radius: 150,
-              lineWidth: 10,
-              percent: (initialDuration - timeRemaining) / initialDuration,
-              center: Container(
-                  margin: EdgeInsets.all(20.0),
-                  // decoration: BoxDecoration(shape: BoxShape.circle),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(formattedDuration(timeRemaining),
-                            style: Theme.of(context).textTheme.headline6),
-                        Divider(thickness: 2, color: Colors.grey),
-                        Text(formattedDuration(initialDuration),
-                            style: Theme.of(context).textTheme.headline6),
-                        Divider(thickness: 2, color: Colors.grey),
-                        Text(formattedTime(eta),
-                            style: Theme.of(context).textTheme.headline6),
-                      ])),
-              progressColor: Theme.of(context).accentColor,
-              circularStrokeCap: CircularStrokeCap.round,
-            );
-          }),
-          Consumer(builder: (context, watch, child) {
-            print("building Play/Pause button for $id");
-            TimerState timerState = watch(timerStateProvider(id));
-            if (timerState == TimerState.started) {
-              return Positioned(
-                left: 0,
-                bottom: 0,
-                child: PauseButton(id),
-              );
-            } else {
-              return Positioned(
-                left: 0,
-                bottom: 0,
-                child: StartButton(id),
-              );
-            }
-          }),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: ResetButton(id),
-          )
-        ]));
-  }
-}
+    // DateTime startTime = context.read(timerNotifierProvider(id)).startTime;
+    int timeRemaining = watch(timeRemainingProvider(id));
+    TimerState timerState = watch(timerStateProvider(id));
+    Color customProgressColor = customerProgressColor(timerState);
+    print(
+        "building TimerCircularAnimation for $id with ${timeRemaining}s left");
 
-class StartButton extends StatelessWidget {
-  final UniqueKey id;
-  const StartButton(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () {
-        context.read(timerNotifierProvider(id)).startTimer();
-      },
-      child: Icon(Icons.play_arrow),
-      mini: true,
+    return CircularPercentIndicator(
+      radius: 150,
+      lineWidth: 10,
+      percent: (initialDuration - timeRemaining) / initialDuration,
+      center: Container(
+          margin: EdgeInsets.all(20.0),
+          // decoration: BoxDecoration(shape: BoxShape.circle),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(formattedDuration(timeRemaining),
+                style: Theme.of(context).textTheme.headline6),
+            Divider(thickness: 2, color: Colors.grey),
+            Text(formattedDuration(initialDuration),
+                style: Theme.of(context).textTheme.headline6),
+            Divider(thickness: 2, color: Colors.grey),
+            ETAString(id),
+          ])),
+      progressColor: customProgressColor,
+      circularStrokeCap: CircularStrokeCap.round,
     );
   }
 }
 
-class PauseButton extends StatelessWidget {
-  final UniqueKey id;
-  const PauseButton(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () {
-        context.read(timerNotifierProvider(id)).pauseTimer();
-      },
-      child: Icon(Icons.pause),
-      mini: true,
-    );
+Color customerProgressColor(TimerState timerState) {
+  switch (timerState) {
+    case TimerState.paused:
+      return Colors.blueGrey;
+    case TimerState.finished:
+      return Colors.red;
+    default:
+      return Colors.blue;
   }
 }
 
-class ResetButton extends StatelessWidget {
+class StartPauseButton extends ConsumerWidget {
+  final UniqueKey id;
+  const StartPauseButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    TimerState timerState = watch(timerStateProvider(id));
+    if (timerState == TimerState.started) {
+      return Positioned(
+        left: 0,
+        bottom: 0,
+        child: FloatingActionButton(
+          onPressed: () {
+            context.read(timerNotifierProvider(id)).pauseTimer();
+          },
+          child: Icon(Icons.pause),
+          mini: true,
+        ),
+      );
+    } else {
+      return Positioned(
+        left: 0,
+        bottom: 0,
+        child: FloatingActionButton(
+          onPressed: () {
+            context.read(timerNotifierProvider(id)).startTimer();
+          },
+          child: Icon(Icons.play_arrow),
+          mini: true,
+        ),
+      );
+    }
+  }
+}
+
+class ResetButton extends ConsumerWidget {
   final UniqueKey id;
   const ResetButton(this.id, {Key key}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () {
-        context.read(timerNotifierProvider(id)).resetTimer();
-      },
-      child: Icon(Icons.replay),
-      mini: true,
-    );
+  Widget build(BuildContext context, ScopedReader watch) {
+    TimerState timerState = watch(timerStateProvider(id));
+    Color buttonColor = (timerState == TimerState.initial)
+        ? Colors.grey
+        : Theme.of(context).floatingActionButtonTheme.backgroundColor;
+    // Color customHoverColor = (timerState == TimerState.initial)
+    //     ? Colors.grey
+    //     : Theme.of(context).floatingActionButtonTheme.backgroundColor;
+    // double customElevation = (timerState == TimerState.initial) ? 0 : 6;
+    // double customHoverElevation = (timerState == TimerState.initial) ? 0 : 8;
+    return Positioned(
+        right: 0,
+        bottom: 0,
+        child: FloatingActionButton(
+          onPressed: () {
+            if (timerState == TimerState.initial) {
+              return null;
+            } else {
+              context.read(timerNotifierProvider(id)).resetTimer();
+            }
+          },
+          child: Icon(
+            Icons.replay,
+          ),
+          mini: true,
+          backgroundColor: buttonColor,
+          // elevation: customElevation,
+          // hoverElevation: customHoverElevation,
+          // hoverColor: customHoverColor,
+          // splashColor: ,
+        ));
   }
 }
 
 String formattedDuration(int duration) {
-  final minutes = ((duration / 60) % 60).floor().toString().padLeft(2, '0');
-  final seconds = (duration % 60).floor().toString().padLeft(2, '0');
-  return '$minutes:$seconds';
+  final int hours = ((duration / 60 / 60) % 60).floor();
+  final String hoursText =
+      (hours > 0) ? hours.toString().padLeft(2, '0') + "h " : "";
+  final int minutes = ((duration / 60) % 60).floor();
+  final String minutesText =
+      (minutes > 0) ? minutes.toString().padLeft(2, '0') + "m " : "";
+  final int seconds = (duration % 60).floor();
+  final String secondsText = seconds.toString().padLeft(2, '0') + "s ";
+  return '$hoursText$minutesText$secondsText';
 }
 
 String formattedTime(DateTime timestamp) {
-  return "${timestamp?.hour.toString().padLeft(2, "0")}:"
-      "${timestamp?.minute.toString().padLeft(2, "0")}:"
-      "${timestamp?.second.toString().padLeft(2, "0")}";
+  return DateFormat.jms().format(timestamp);
+}
+
+class ETAString extends ConsumerWidget {
+  final UniqueKey id;
+  ETAString(this.id, {Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    TimerState timerState = watch(timerStateProvider(id));
+    switch (timerState) {
+      case TimerState.started:
+        return Text(formattedTime(context.read(timerNotifierProvider(id)).eta),
+            style: Theme.of(context).textTheme.headline6);
+      case TimerState.finished:
+        return Text(formattedTime(context.read(timerNotifierProvider(id)).eta),
+            style: Theme.of(context).textTheme.headline6);
+      default:
+        return Text("-", style: Theme.of(context).textTheme.headline6);
+    }
+  }
 }

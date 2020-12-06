@@ -30,6 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.1
   flutter_riverpod:
   percent_indicator: "^2.1.7+2"
+  intl:
 
 dev_dependencies:
   flutter_test:
