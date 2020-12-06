@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:yetanothertimerapp/components/Providers.dart';
+import 'package:yetanothertimerapp/shared/Providers.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
 class TimerItem extends StatelessWidget {
@@ -36,9 +36,11 @@ class TimerCircularAnimation extends ConsumerWidget {
         "building TimerCircularAnimation for $id with ${timeRemaining}s left");
 
     return CircularPercentIndicator(
-      radius: 150,
+      radius: 200,
       lineWidth: 10,
-      percent: (initialDuration - timeRemaining) / initialDuration,
+      percent: double.parse(
+          ((initialDuration - timeRemaining) / initialDuration)
+              .toStringAsFixed(2)),
       center: Container(
           margin: EdgeInsets.all(20.0),
           // decoration: BoxDecoration(shape: BoxShape.circle),
@@ -62,7 +64,7 @@ Color customerProgressColor(TimerState timerState) {
     case TimerState.paused:
       return Colors.blueGrey;
     case TimerState.finished:
-      return Colors.red;
+      return Colors.green;
     default:
       return Colors.blue;
   }
@@ -141,14 +143,12 @@ class ResetButton extends ConsumerWidget {
 }
 
 String formattedDuration(int duration) {
-  final int hours = ((duration / 60 / 60) % 60).floor();
-  final String hoursText =
-      (hours > 0) ? hours.toString().padLeft(2, '0') + "h " : "";
+  final int hours = (duration / 60 / 60).floor();
+  final String hoursText = (hours > 0) ? hours.toString() + "h " : "";
   final int minutes = ((duration / 60) % 60).floor();
-  final String minutesText =
-      (minutes > 0) ? minutes.toString().padLeft(2, '0') + "m " : "";
+  final String minutesText = (minutes > 0) ? minutes.toString() + "m " : "";
   final int seconds = (duration % 60).floor();
-  final String secondsText = seconds.toString().padLeft(2, '0') + "s ";
+  final String secondsText = (seconds > 0) ? seconds.toString() + "s " : "";
   return '$hoursText$minutesText$secondsText';
 }
 

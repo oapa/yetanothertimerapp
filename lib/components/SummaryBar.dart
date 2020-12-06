@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yetanothertimerapp/components/Providers.dart';
-import 'package:yetanothertimerapp/components/SharedConstructors.dart';
+import 'package:yetanothertimerapp/shared/Providers.dart';
+import 'package:yetanothertimerapp/shared/Constructors.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
 class SummaryBar extends ConsumerWidget {

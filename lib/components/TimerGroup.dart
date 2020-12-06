@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yetanothertimerapp/components/Providers.dart';
-import 'package:yetanothertimerapp/components/SharedConstructors.dart';
+import 'package:yetanothertimerapp/shared/Providers.dart';
+import 'package:yetanothertimerapp/shared/Constructors.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 import 'package:yetanothertimerapp/components/TimerItem.dart';
 
@@ -17,8 +17,7 @@ class TimerGroup {
           minHeight: 30.0,
           maxHeight: 30.0,
           child: Container(
-              color: Colors.lightBlue,
-              child: Center(child: Text("$groupName"))),
+              color: Colors.blue, child: Center(child: Text("$groupName"))),
         ),
       ),
       TimerListWidget()

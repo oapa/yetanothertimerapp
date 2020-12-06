@@ -13,8 +13,11 @@ class YetAnotherTimerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Yet Another Timer App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: Dashboard(title: 'Timers Dashboard'),
     );
   }

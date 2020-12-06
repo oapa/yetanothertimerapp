@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yetanothertimerapp/components/QuickAddTimer.dart';
-import 'package:yetanothertimerapp/components/SummaryBar.dart';
+// import 'package:yetanothertimerapp/components/SummaryBar.dart';
 import 'package:yetanothertimerapp/components/TimerGroup.dart';
 
 class Dashboard extends StatelessWidget {
@@ -14,11 +14,12 @@ class Dashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Timer App"),
+        title: Text("Yet Another Timer App"),
       ),
       body: CustomScrollView(slivers: <Widget>[
-        const QuickAddTimer(),
-        const SummaryBar(),
+        // const QuickAddTimer(),
+        QuickAddTimer(),
+        // const SummaryBar(),
         ...TimerGroup().getTimerGroup(),
       ]),
     );
