@@ -15,8 +15,8 @@ class TimerItem extends StatelessWidget {
     print('building $id TimerTextWidget');
     return Stack(alignment: Alignment.center, children: [
       TimerButtonsContainer(id),
-      TimerInfoContainer(id),
-      TimerCircularAnimation(id),
+      ClipOval(child: TimerInfoContainer(id)),
+      ClipOval(child: TimerCircularAnimation(id)),
       TimerLabelInfo(id)
     ]);
   }
@@ -59,11 +59,15 @@ class TimerCircularAnimation extends ConsumerWidget {
     int timeRemaining = watch(timeRemainingProvider(id));
     TimerState timerState = watch(timerStateProvider(id));
     Color progressColor = customProgressColor(timerState);
+
+    double contextWidth = MediaQuery.of(context).size.width;
+    double circleRadius = calculateDialRadius(contextWidth);
+
     print(
         "building TimerCircularAnimation for $id with ${timeRemaining}s left");
 
     return CircularPercentIndicator(
-      radius: 200,
+      radius: circleRadius,
       lineWidth: 10,
       percent: double.parse(
           ((initialDuration - timeRemaining) / initialDuration)
@@ -75,16 +79,24 @@ class TimerCircularAnimation extends ConsumerWidget {
   }
 }
 
+double calculateDialRadius(double contextWidth) {
+  int maxTimerItemSize = 375;
+  int numTimers = (contextWidth / maxTimerItemSize).round();
+  return ((contextWidth - 40) - (numTimers - 1) * 10) / numTimers - 30;
+}
+
 class TimerInfoContainer extends StatelessWidget {
   final UniqueKey id;
   const TimerInfoContainer(this.id, {Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     print("building TimerInfoContainer for $id");
+    double contextWidth = MediaQuery.of(context).size.width;
+    double circleRadius = calculateDialRadius(contextWidth);
 
     return SizedBox(
-        height: 220,
-        width: 220,
+        height: circleRadius,
+        width: circleRadius,
         child: Container(
           margin: EdgeInsets.all(0.0),
           decoration:
@@ -154,14 +166,7 @@ class TimerMoveButton extends StatelessWidget {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5.0),
           side: BorderSide(color: Colors.white)),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return EditTimerDialog(id);
-          },
-        );
-      },
+      onPressed: () {},
       color: Colors.blueGrey,
       textColor: Colors.white,
       child: Align(

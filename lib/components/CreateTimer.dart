@@ -69,88 +69,90 @@ class CreateTimerFormState extends State<CreateTimerForm> {
       key: _formKey,
       child: FocusScope(
         node: _node,
-        child: Wrap(
-          // crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: 60,
-              child: TextFormField(
-                controller: hourEntryController,
-                // maxLength: 2,
-                // maxLengthEnforced: true,
-                decoration: const InputDecoration(
-                    labelText: 'hr',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Container(
+                width: 60,
+                child: TextFormField(
+                  controller: hourEntryController,
+                  // maxLength: 2,
+                  // maxLengthEnforced: true,
+                  decoration: const InputDecoration(
+                      labelText: 'hr',
+                      border: OutlineInputBorder(),
+                      errorStyle: TextStyle(height: 0)),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    return validateHours(value);
+                  },
+                  onChanged: (value) => autoAdvance(value),
+                  onFieldSubmitted: (value) => createNewTimer(value),
+                ),
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 60,
+                child: TextFormField(
+                  controller: minuteEntryController,
+                  // maxLength: 2,
+                  // maxLengthEnforced: true,
+                  decoration: const InputDecoration(
+                    labelText: 'min',
                     border: OutlineInputBorder(),
-                    errorStyle: TextStyle(height: 0)),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (value) {
-                  return validateHours(value);
-                },
-                onChanged: (value) => autoAdvance(value),
-                onFieldSubmitted: (value) => createNewTimer(value),
-              ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 60,
-              child: TextFormField(
-                controller: minuteEntryController,
-                // maxLength: 2,
-                // maxLengthEnforced: true,
-                decoration: const InputDecoration(
-                  labelText: 'min',
-                  border: OutlineInputBorder(),
-                  errorStyle: TextStyle(height: 0),
-                  // errorText: validationService.hours.error;
+                    errorStyle: TextStyle(height: 0),
+                    // errorText: validationService.hours.error;
+                  ),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    return validateMinutes(value);
+                  },
+                  onChanged: (value) => autoAdvance(value),
+                  onFieldSubmitted: (value) => createNewTimer(value),
                 ),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (value) {
-                  return validateMinutes(value);
-                },
-                onChanged: (value) => autoAdvance(value),
-                onFieldSubmitted: (value) => createNewTimer(value),
               ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 60,
-              child: TextFormField(
-                controller: secondsEntryController,
-                // maxLength: 2,
-                // maxLengthEnforced: true,
-                decoration: const InputDecoration(
-                  labelText: 'sec',
-                  border: OutlineInputBorder(),
-                  errorStyle: TextStyle(height: 0),
+              SizedBox(width: 10),
+              Container(
+                width: 60,
+                child: TextFormField(
+                  controller: secondsEntryController,
+                  // maxLength: 2,
+                  // maxLengthEnforced: true,
+                  decoration: const InputDecoration(
+                    labelText: 'sec',
+                    border: OutlineInputBorder(),
+                    errorStyle: TextStyle(height: 0),
+                  ),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    return validateSeconds(value);
+                  },
+                  onFieldSubmitted: (value) => createNewTimer(value),
                 ),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (value) {
-                  return validateSeconds(value);
-                },
-                onFieldSubmitted: (value) => createNewTimer(value),
               ),
-            ),
-            SizedBox(width: 20),
-            Container(
-              width: 60,
-              height: 55,
-              // padding: EdgeInsets.only(top: 5),
-              child: RaisedButton(
-                child: Text("ADD"),
-                onPressed: () {
-                  createNewTimerButton();
-                },
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-              ),
-            ),
-            SizedBox(width: 20),
+            ]),
+            // SizedBox(height: 20),
+            // Container(
+            //   width: 60,
+            //   height: 55,
+            //   // padding: EdgeInsets.only(top: 5),
+            //   child: RaisedButton(
+            //     child: Text("ADD"),
+            //     onPressed: () {
+            //       createNewTimerButton();
+            //     },
+            //     shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(20)),
+            //   ),
+            // ),
+            SizedBox(height: 20),
             Container(
               width: 150,
               child: TextFormField(
@@ -163,21 +165,14 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                   border: OutlineInputBorder(),
                   errorStyle: TextStyle(height: 0),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  // errorText: validationService.hours.error;
                 ),
-                // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 keyboardType: TextInputType.text,
-                // autovalidateMode: AutovalidateMode.onUserInteraction,
-                // validator: (value) {
-                //   return validateLabel(value);
-                // },
                 onFieldSubmitted: (value) => createNewTimer(value),
               ),
             ),
-            SizedBox(width: 20),
+            SizedBox(height: 20),
             Container(
               width: 250,
-              // padding: EdgeInsets.all(4),
               child: DropdownButtonFormField(
                 decoration: InputDecoration(
                   labelText: 'Group',
@@ -187,10 +182,10 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   prefixIcon: Container(
                     padding: EdgeInsets.only(left: 10, right: 20),
-                    width: 80,
+                    width: 60,
                     child: RaisedButton(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(Icons.add_rounded),
+                      child: Icon(Icons.add),
                       // shape: CircleBorder(),
                       onPressed: () {
                         addGroup();
@@ -200,10 +195,6 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                     ),
                   ),
                 ),
-                // autovalidateMode: AutovalidateMode.onUserInteraction,
-                // validator: (value) {
-                //   return validateGroupName(value);
-                // },
                 items: [
                   DropdownMenuItem(child: Text("Default"), value: "Default")
                 ],
