@@ -39,7 +39,9 @@ class TimerListWidget extends ConsumerWidget {
     return SliverGrid.count(
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
-        crossAxisCount: 3,
+        crossAxisCount: 2,
+        childAspectRatio: MediaQuery.of(context).size.width /
+            (MediaQuery.of(context).size.height / 2),
         children: allTimersList.entries.map((t) {
           return Dismissible(
             key: ValueKey(t.key),

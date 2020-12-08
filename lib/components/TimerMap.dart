@@ -6,10 +6,11 @@ class TimerMap extends ChangeNotifier {
 
   TimerMap(this.timerMap);
 
-  void add(UniqueKey uniqueKey, int initialDuration) {
+  void add(UniqueKey uniqueKey, int initialDuration, {String timerLabel}) {
     print("adding a new timer $uniqueKey");
-    timerMap[uniqueKey] =
-        TimerNotifier(uniqueKey, initialDuration, TimerState.initial);
+    timerMap[uniqueKey] = TimerNotifier(
+        uniqueKey, initialDuration, TimerState.initial,
+        timerLabel: timerLabel);
     notifyListeners();
   }
 

@@ -121,7 +121,7 @@ class QuickAddTimerState extends State<QuickAddTimer> {
                     width: 150,
                     child: TextFormField(
                       controller: labelEntryController,
-                      maxLength: 30,
+                      maxLength: 15,
                       maxLengthEnforced: true,
                       decoration: const InputDecoration(
                         labelText: 'Label',
@@ -212,7 +212,8 @@ class QuickAddTimerState extends State<QuickAddTimer> {
               (int.tryParse(minuteEntryController.text) ?? 0) * 60 +
               (int.tryParse(secondsEntryController.text) ?? 0);
 
-      context.read(timerListProvider).add(UniqueKey(), totalSeconds);
+      context.read(timerListProvider).add(UniqueKey(), totalSeconds,
+          timerLabel: labelEntryController.text.trim());
       _formKey.currentState?.reset();
     } else {}
   }

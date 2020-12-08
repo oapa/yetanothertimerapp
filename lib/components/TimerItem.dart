@@ -12,11 +12,27 @@ class TimerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('building $id TimerTextWidget');
-    return Stack(alignment: Alignment.center, children: [
-      TimerCircularAnimation(id),
-      StartPauseButton(id),
-      ResetButton(id),
-    ]);
+    return SizedBox(
+        height: 400,
+        width: 400,
+        child: Stack(alignment: Alignment.center, children: [
+          Positioned(
+              top: 0,
+              right: 0,
+              child: SizedBox(
+                height: 100,
+                width: 200,
+                child: const DecoratedBox(
+                    decoration: const BoxDecoration(color: Colors.red)),
+              )),
+          TimerCircularAnimation(id),
+          TimerInfoContainer(id),
+          TimerMoveButton(id),
+          TimerEditButton(id),
+          StartPauseButton(id),
+          ResetButton(id),
+          TimerLabelInfo(id)
+        ]));
   }
 }
 
@@ -31,7 +47,7 @@ class TimerCircularAnimation extends ConsumerWidget {
     // DateTime startTime = context.read(timerNotifierProvider(id)).startTime;
     int timeRemaining = watch(timeRemainingProvider(id));
     TimerState timerState = watch(timerStateProvider(id));
-    Color customProgressColor = customerProgressColor(timerState);
+    Color progressColor = customProgressColor(timerState);
     print(
         "building TimerCircularAnimation for $id with ${timeRemaining}s left");
 
@@ -41,25 +57,147 @@ class TimerCircularAnimation extends ConsumerWidget {
       percent: double.parse(
           ((initialDuration - timeRemaining) / initialDuration)
               .toStringAsFixed(2)),
-      center: Container(
-          margin: EdgeInsets.all(20.0),
-          // decoration: BoxDecoration(shape: BoxShape.circle),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(formattedDuration(timeRemaining),
-                style: Theme.of(context).textTheme.headline6),
-            Divider(thickness: 2, color: Colors.grey),
-            Text(formattedDuration(initialDuration),
-                style: Theme.of(context).textTheme.headline6),
-            Divider(thickness: 2, color: Colors.grey),
-            ETAString(id),
-          ])),
-      progressColor: customProgressColor,
+      // center: TimerInfo(id),
+      progressColor: progressColor,
       circularStrokeCap: CircularStrokeCap.round,
     );
   }
 }
 
-Color customerProgressColor(TimerState timerState) {
+class TimerInfoContainer extends StatelessWidget {
+  final UniqueKey id;
+  const TimerInfoContainer(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    print("building TimerInfoContainer for $id");
+
+    return SizedBox(
+        height: 250,
+        width: 250,
+        child: Container(
+          margin: EdgeInsets.all(15.0),
+          decoration:
+              BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            TimeRemainingInfo(id),
+            Divider(
+              thickness: 1,
+              color: Colors.grey,
+            ),
+            InitialDurationInfo(id),
+            Divider(thickness: 1, color: Colors.grey),
+            ETAInfo(id),
+          ]),
+        ));
+  }
+}
+
+class TimeRemainingInfo extends ConsumerWidget {
+  final UniqueKey id;
+  const TimeRemainingInfo(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    // DateTime startTime = context.read(timerNotifierProvider(id)).startTime;
+    int timeRemaining = watch(timeRemainingProvider(id));
+    // TimerState timerState = watch(timerStateProvider(id));
+    print("building TimeRemainingInfo for $id with ${timeRemaining}s left");
+
+    return Text(formattedDuration(timeRemaining),
+        style: Theme.of(context).textTheme.headline6);
+  }
+}
+
+class InitialDurationInfo extends StatelessWidget {
+  final UniqueKey id;
+  const InitialDurationInfo(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    int initialDuration =
+        context.read(timerNotifierProvider(id)).initialDuration;
+    print("building InitialDurationInfo for $id");
+
+    return Text(formattedDuration(initialDuration),
+        style: Theme.of(context).textTheme.headline6);
+  }
+}
+
+class TimerLabelInfo extends StatelessWidget {
+  final UniqueKey id;
+  const TimerLabelInfo(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    String timerLabel = context.read(timerNotifierProvider(id)).timerLabel;
+    print("building TimerLabel for $id with $timerLabel");
+
+    return Positioned(
+        bottom: 0,
+        child: Text(timerLabel ?? "",
+            style: Theme.of(context).textTheme.bodyText2));
+  }
+}
+
+class TimerMoveButton extends StatelessWidget {
+  final UniqueKey id;
+  const TimerMoveButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    print("building TimerMoveButton for $id");
+
+    return Positioned(
+      top: 10,
+      left: 10,
+      child: Icon(Icons.drag_indicator),
+    );
+  }
+}
+
+class TimerEditButton extends StatelessWidget {
+  final UniqueKey id;
+  const TimerEditButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    print("building TimerEditButton for $id");
+// set up the buttons
+    Widget cancelButton = FlatButton(
+      child: Text("Cancel"),
+      onPressed: () {},
+    );
+    Widget continueButton = FlatButton(
+      child: Text("Continue"),
+      onPressed: () {},
+    );
+
+// set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("AlertDialog"),
+      content: Text(
+          "Would you like to continue learning how to use Flutter alerts?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return alert;
+            },
+          );
+        },
+        child: Icon(Icons.edit),
+        mini: true,
+      ),
+    );
+  }
+}
+
+Color customProgressColor(TimerState timerState) {
   switch (timerState) {
     case TimerState.paused:
       return Colors.blueGrey;
@@ -113,11 +251,6 @@ class ResetButton extends ConsumerWidget {
     Color buttonColor = (timerState == TimerState.initial)
         ? Colors.grey
         : Theme.of(context).floatingActionButtonTheme.backgroundColor;
-    // Color customHoverColor = (timerState == TimerState.initial)
-    //     ? Colors.grey
-    //     : Theme.of(context).floatingActionButtonTheme.backgroundColor;
-    // double customElevation = (timerState == TimerState.initial) ? 0 : 6;
-    // double customHoverElevation = (timerState == TimerState.initial) ? 0 : 8;
     return Positioned(
         right: 0,
         bottom: 0,
@@ -134,10 +267,6 @@ class ResetButton extends ConsumerWidget {
           ),
           mini: true,
           backgroundColor: buttonColor,
-          // elevation: customElevation,
-          // hoverElevation: customHoverElevation,
-          // hoverColor: customHoverColor,
-          // splashColor: ,
         ));
   }
 }
@@ -156,9 +285,9 @@ String formattedTime(DateTime timestamp) {
   return DateFormat.jms().format(timestamp);
 }
 
-class ETAString extends ConsumerWidget {
+class ETAInfo extends ConsumerWidget {
   final UniqueKey id;
-  ETAString(this.id, {Key key}) : super(key: key);
+  ETAInfo(this.id, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {

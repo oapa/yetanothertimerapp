@@ -17,7 +17,6 @@ class Dashboard extends StatelessWidget {
         title: Text("Yet Another Timer App"),
       ),
       body: CustomScrollView(slivers: <Widget>[
-        // const QuickAddTimer(),
         QuickAddTimer(),
         // const SummaryBar(),
         ...TimerGroup().getTimerGroup(),

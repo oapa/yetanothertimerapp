@@ -5,11 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class TimerNotifier extends StateNotifier<TimerModel> {
   UniqueKey id;
   int initialDuration;
+  String timerLabel;
+  String timerGroup;
   TimerState timerState;
   DateTime eta;
   DateTime startTime;
 
-  TimerNotifier(this.id, this.initialDuration, this.timerState)
+  TimerNotifier(this.id, this.initialDuration, this.timerState,
+      {this.timerLabel, this.timerGroup})
       : super(TimerModel(initialDuration, TimerState.initial));
 
   final Ticker ticker = Ticker();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yetanothertimerapp/components/TimerList.dart';
+import 'package:yetanothertimerapp/components/TimerMap.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
 final timerListProvider = ChangeNotifierProvider<TimerMap>((ref) {
