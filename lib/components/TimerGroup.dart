@@ -37,11 +37,11 @@ class TimerListWidget extends ConsumerWidget {
     print("building TimerListWidget with $allTimersList");
 
     return SliverGrid.count(
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
-        crossAxisCount: 2,
-        childAspectRatio: MediaQuery.of(context).size.width /
-            (MediaQuery.of(context).size.height / 2),
+        // mainAxisSpacing: 5,
+        // crossAxisSpacing: 5,
+        crossAxisCount: (MediaQuery.of(context).size.width / 375).round(),
+        // childAspectRatio: MediaQuery.of(context).size.width /
+        //     (MediaQuery.of(context).size.height / 2),
         children: allTimersList.entries.map((t) {
           return Dismissible(
             key: ValueKey(t.key),

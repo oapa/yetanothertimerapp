@@ -12,27 +12,39 @@ class TimerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('building $id TimerTextWidget');
-    return SizedBox(
-        height: 400,
-        width: 400,
+    return Padding(
+        padding: EdgeInsets.all(10),
         child: Stack(alignment: Alignment.center, children: [
-          Positioned(
-              top: 0,
-              right: 0,
-              child: SizedBox(
-                height: 100,
-                width: 200,
-                child: const DecoratedBox(
-                    decoration: const BoxDecoration(color: Colors.red)),
-              )),
-          TimerCircularAnimation(id),
+          TimerButtonsContainer(id),
           TimerInfoContainer(id),
-          TimerMoveButton(id),
-          TimerEditButton(id),
-          StartPauseButton(id),
-          ResetButton(id),
+          TimerCircularAnimation(id),
           TimerLabelInfo(id)
         ]));
+  }
+}
+
+class TimerButtonsContainer extends StatelessWidget {
+  final UniqueKey id;
+  const TimerButtonsContainer(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [TimerMoveButton(id), TimerEditButton(id)],
+          )),
+          Expanded(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [StartPauseButton(id), ResetButton(id)],
+          ))
+        ]);
   }
 }
 
@@ -72,20 +84,15 @@ class TimerInfoContainer extends StatelessWidget {
     print("building TimerInfoContainer for $id");
 
     return SizedBox(
-        height: 250,
-        width: 250,
+        height: 220,
+        width: 220,
         child: Container(
-          margin: EdgeInsets.all(15.0),
+          margin: EdgeInsets.all(0.0),
           decoration:
               BoxDecoration(shape: BoxShape.circle, color: Colors.white),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             TimeRemainingInfo(id),
-            Divider(
-              thickness: 1,
-              color: Colors.grey,
-            ),
             InitialDurationInfo(id),
-            Divider(thickness: 1, color: Colors.grey),
             ETAInfo(id),
           ]),
         ));
@@ -143,21 +150,35 @@ class TimerMoveButton extends StatelessWidget {
   Widget build(BuildContext context) {
     print("building TimerMoveButton for $id");
 
-    return Positioned(
-      top: 10,
-      left: 10,
-      child: Icon(Icons.drag_indicator),
-    );
+    return Expanded(
+        child: RaisedButton(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          side: BorderSide(color: Colors.white)),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return EditTimerDialog(id);
+          },
+        );
+      },
+      color: Colors.blueGrey,
+      textColor: Colors.white,
+      child: Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 0, 0),
+              child: Icon(Icons.drag_indicator))),
+    ));
   }
 }
 
-class TimerEditButton extends StatelessWidget {
+class EditTimerDialog extends StatelessWidget {
   final UniqueKey id;
-  const TimerEditButton(this.id, {Key key}) : super(key: key);
+  const EditTimerDialog(this.id, {Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    print("building TimerEditButton for $id");
-// set up the buttons
     Widget cancelButton = FlatButton(
       child: Text("Cancel"),
       onPressed: () {},
@@ -166,8 +187,6 @@ class TimerEditButton extends StatelessWidget {
       child: Text("Continue"),
       onPressed: () {},
     );
-
-// set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("AlertDialog"),
       content: Text(
@@ -177,23 +196,38 @@ class TimerEditButton extends StatelessWidget {
         continueButton,
       ],
     );
+    return alert;
+  }
+}
 
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return alert;
-            },
-          );
-        },
-        child: Icon(Icons.edit),
-        mini: true,
-      ),
-    );
+class TimerEditButton extends StatelessWidget {
+  final UniqueKey id;
+  const TimerEditButton(this.id, {Key key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    print("building TimerEditButton for $id");
+
+    return Expanded(
+        child: RaisedButton(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          side: BorderSide(color: Colors.white)),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return EditTimerDialog(id);
+          },
+        );
+      },
+      color: Colors.orange,
+      textColor: Colors.white,
+      child: Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 20, 20, 0),
+              child: Icon(Icons.edit))),
+    ));
   }
 }
 
@@ -214,30 +248,31 @@ class StartPauseButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     TimerState timerState = watch(timerStateProvider(id));
+    IconData playPauseIcon =
+        (timerState == TimerState.started) ? Icons.pause : Icons.play_arrow;
+    return Expanded(
+        child: RaisedButton(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          side: BorderSide(color: Colors.white)),
+      onPressed: () {
+        startPauseButtonAction(context, timerState);
+      },
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 0, 20),
+              child: Icon(playPauseIcon))),
+    ));
+  }
+
+  void startPauseButtonAction(BuildContext context, TimerState timerState) {
     if (timerState == TimerState.started) {
-      return Positioned(
-        left: 0,
-        bottom: 0,
-        child: FloatingActionButton(
-          onPressed: () {
-            context.read(timerNotifierProvider(id)).pauseTimer();
-          },
-          child: Icon(Icons.pause),
-          mini: true,
-        ),
-      );
+      context.read(timerNotifierProvider(id)).pauseTimer();
     } else {
-      return Positioned(
-        left: 0,
-        bottom: 0,
-        child: FloatingActionButton(
-          onPressed: () {
-            context.read(timerNotifierProvider(id)).startTimer();
-          },
-          child: Icon(Icons.play_arrow),
-          mini: true,
-        ),
-      );
+      context.read(timerNotifierProvider(id)).startTimer();
     }
   }
 }
@@ -248,26 +283,28 @@ class ResetButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     TimerState timerState = watch(timerStateProvider(id));
-    Color buttonColor = (timerState == TimerState.initial)
-        ? Colors.grey
-        : Theme.of(context).floatingActionButtonTheme.backgroundColor;
-    return Positioned(
-        right: 0,
-        bottom: 0,
-        child: FloatingActionButton(
-          onPressed: () {
-            if (timerState == TimerState.initial) {
-              return null;
-            } else {
-              context.read(timerNotifierProvider(id)).resetTimer();
-            }
-          },
-          child: Icon(
-            Icons.replay,
-          ),
-          mini: true,
-          backgroundColor: buttonColor,
-        ));
+    Color buttonColor =
+        (timerState == TimerState.initial) ? Colors.grey : Colors.blue;
+    return Expanded(
+        child: RaisedButton(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          side: BorderSide(color: Colors.white)),
+      onPressed: () {
+        if (timerState == TimerState.initial) {
+          return null;
+        } else {
+          context.read(timerNotifierProvider(id)).resetTimer();
+        }
+      },
+      color: buttonColor,
+      textColor: Colors.white,
+      child: Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 20, 20),
+              child: Icon(Icons.replay))),
+    ));
   }
 }
 
