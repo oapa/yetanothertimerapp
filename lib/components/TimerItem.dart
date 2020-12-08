@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:yetanothertimerapp/shared/Providers.dart';
+import 'package:yetanothertimerapp/components/CreateTimer.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
 class TimerItem extends StatelessWidget {
@@ -12,14 +13,12 @@ class TimerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('building $id TimerTextWidget');
-    return Padding(
-        padding: EdgeInsets.all(10),
-        child: Stack(alignment: Alignment.center, children: [
-          TimerButtonsContainer(id),
-          TimerInfoContainer(id),
-          TimerCircularAnimation(id),
-          TimerLabelInfo(id)
-        ]));
+    return Stack(alignment: Alignment.center, children: [
+      TimerButtonsContainer(id),
+      TimerInfoContainer(id),
+      TimerCircularAnimation(id),
+      TimerLabelInfo(id)
+    ]);
   }
 }
 
@@ -188,9 +187,8 @@ class EditTimerDialog extends StatelessWidget {
       onPressed: () {},
     );
     AlertDialog alert = AlertDialog(
-      title: Text("AlertDialog"),
-      content: Text(
-          "Would you like to continue learning how to use Flutter alerts?"),
+      title: Text("Add a timer"),
+      content: CreateTimerForm(),
       actions: [
         cancelButton,
         continueButton,
