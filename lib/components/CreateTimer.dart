@@ -23,7 +23,8 @@ class QuickAddTimerSliver extends StatelessWidget {
 }
 
 class CreateTimerDialog extends StatelessWidget {
-  const CreateTimerDialog({Key key}) : super(key: key);
+  final UniqueKey id;
+  const CreateTimerDialog({Key key, this.id}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     Widget cancelButton = FlatButton(
@@ -36,7 +37,7 @@ class CreateTimerDialog extends StatelessWidget {
     );
     AlertDialog alert = AlertDialog(
       title: Text("Add a timer"),
-      content: CreateTimerForm(),
+      content: CreateTimerForm(id: id),
       actions: [
         cancelButton,
         continueButton,
@@ -253,7 +254,7 @@ class CreateTimerFormState extends State<CreateTimerForm> {
             timerLabel: labelEntryController.text.trim());
       } else {
         context.read(timerListProvider).add(
-            id: UniqueKey(),
+            id: id,
             initialDuration: totalSeconds,
             timerLabel: labelEntryController.text.trim());
       }

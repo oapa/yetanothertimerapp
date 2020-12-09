@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yetanothertimerapp/shared/Providers.dart';
 import 'package:yetanothertimerapp/shared/Constructors.dart';
+import 'package:yetanothertimerapp/shared/UISettings.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 import 'package:yetanothertimerapp/components/TimerItem.dart';
 
@@ -41,10 +42,10 @@ class TimerListWidget extends ConsumerWidget {
     print("building TimerListWidget with $allTimersList");
 
     return SliverPadding(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+        padding: EdgeInsets.all(timerGroupPadding),
         sliver: SliverGrid.count(
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
+            mainAxisSpacing: timerGridSpacing,
+            crossAxisSpacing: timerGridSpacing,
             crossAxisCount:
                 (MediaQuery.of(context).size.width / maxTimerItemSize).round(),
             // childAspectRatio: MediaQuery.of(context).size.width /

@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:yetanothertimerapp/shared/Providers.dart';
+import 'package:yetanothertimerapp/shared/UISettings.dart';
 import 'package:yetanothertimerapp/components/CreateTimer.dart';
+import 'package:yetanothertimerapp/components/TimerButtons.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
-
-final double buttonInset = 15.0;
-final double maxTimerItemSize = 300;
 
 class TimerItem extends StatelessWidget {
   final UniqueKey id;
@@ -71,7 +70,7 @@ class TimerCircularAnimation extends ConsumerWidget {
 
     return CircularPercentIndicator(
       radius: circleRadius,
-      lineWidth: 10,
+      lineWidth: timerIndicatorWidth,
       percent: double.parse(
           ((initialDuration - timeRemaining) / initialDuration)
               .toStringAsFixed(2)),
@@ -84,7 +83,10 @@ class TimerCircularAnimation extends ConsumerWidget {
 
 double calculateDialRadius(double contextWidth) {
   int numTimers = (contextWidth / maxTimerItemSize).round();
-  return ((contextWidth - 40) - (numTimers - 1) * 10) / numTimers - 50;
+  return ((contextWidth - timerGroupPadding * 2) -
+              (numTimers - 1) * timerGridSpacing) /
+          numTimers -
+      maxTimerItemSize / 6;
 }
 
 class TimerInfoContainer extends StatelessWidget {
@@ -98,12 +100,11 @@ class TimerInfoContainer extends StatelessWidget {
     double circleRadius = calculateDialRadius(contextWidth);
 
     return SizedBox(
-        height: circleRadius + 10,
-        width: circleRadius + 10,
+        height: circleRadius + timerIndicatorPadding,
+        width: circleRadius + timerIndicatorPadding,
         child: Container(
-          margin: EdgeInsets.all(0.0),
-          decoration:
-              BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+          decoration: BoxDecoration(
+              shape: BoxShape.circle, color: timerInfoBackgroundColor),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             TimeRemainingInfo(id),
             InitialDurationInfo(id),
@@ -125,7 +126,7 @@ class TimeRemainingInfo extends ConsumerWidget {
     print("building TimeRemainingInfo for $id with ${timeRemaining}s left");
 
     return Text(formattedDuration(timeRemaining),
-        style: Theme.of(context).textTheme.headline6);
+        style: Theme.of(context).textTheme.headline5);
   }
 }
 
@@ -140,7 +141,7 @@ class InitialDurationInfo extends StatelessWidget {
     print("building InitialDurationInfo for $id");
 
     return Text(formattedDuration(initialDuration),
-        style: Theme.of(context).textTheme.headline6);
+        style: Theme.of(context).textTheme.caption);
   }
 }
 
@@ -157,31 +158,6 @@ class TimerLabelInfo extends StatelessWidget {
         bottom: 0,
         child: Text(timerLabel ?? "",
             style: Theme.of(context).textTheme.bodyText2));
-  }
-}
-
-class TimerMoveButton extends StatelessWidget {
-  // TODO: Implement move/reorder functionality
-  final UniqueKey id;
-  const TimerMoveButton(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    print("building TimerMoveButton for $id");
-
-    return Expanded(
-        child: RaisedButton(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          side: BorderSide(color: Colors.white)),
-      onPressed: () {},
-      color: Colors.blueGrey,
-      textColor: Colors.white,
-      child: Align(
-          alignment: Alignment.topLeft,
-          child: Padding(
-              padding: EdgeInsets.fromLTRB(buttonInset, buttonInset, 0, 0),
-              child: Icon(Icons.drag_indicator))),
-    ));
   }
 }
 
@@ -210,112 +186,15 @@ class EditTimerDialog extends StatelessWidget {
   }
 }
 
-class TimerEditButton extends StatelessWidget {
-  final UniqueKey id;
-  const TimerEditButton(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    print("building TimerEditButton for $id");
-
-    return Expanded(
-        child: RaisedButton(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          side: BorderSide(color: Colors.white)),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return EditTimerDialog(id);
-          },
-        );
-      },
-      color: Colors.orange,
-      textColor: Colors.white,
-      child: Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-              padding: EdgeInsets.fromLTRB(0, buttonInset, buttonInset, 0),
-              child: Icon(Icons.edit))),
-    ));
-  }
-}
-
 Color customProgressColor(TimerState timerState) {
   //TODO: Use theme swatch instead of constants for progress colors
   switch (timerState) {
     case TimerState.paused:
-      return Colors.blueGrey;
+      return timerProgressPausedColor;
     case TimerState.finished:
-      return Colors.green;
+      return timerProgressFinishedColor;
     default:
-      return Colors.blue;
-  }
-}
-
-class StartPauseButton extends ConsumerWidget {
-  final UniqueKey id;
-  const StartPauseButton(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    TimerState timerState = watch(timerStateProvider(id));
-    IconData playPauseIcon =
-        (timerState == TimerState.started) ? Icons.pause : Icons.play_arrow;
-    return Expanded(
-        child: RaisedButton(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          side: BorderSide(color: Colors.white)),
-      onPressed: () {
-        startPauseButtonAction(context, timerState);
-      },
-      color: Colors.blue,
-      textColor: Colors.white,
-      child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-              padding: EdgeInsets.fromLTRB(buttonInset, 0, 0, buttonInset),
-              child: Icon(playPauseIcon))),
-    ));
-  }
-
-  void startPauseButtonAction(BuildContext context, TimerState timerState) {
-    if (timerState == TimerState.started) {
-      context.read(timerNotifierProvider(id)).pauseTimer();
-    } else {
-      context.read(timerNotifierProvider(id)).startTimer();
-    }
-  }
-}
-
-class ResetButton extends ConsumerWidget {
-  final UniqueKey id;
-  const ResetButton(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    TimerState timerState = watch(timerStateProvider(id));
-    Color buttonColor =
-        (timerState == TimerState.initial) ? Colors.grey : Colors.blue;
-    return Expanded(
-        child: RaisedButton(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          side: BorderSide(color: Colors.white)),
-      onPressed: () {
-        if (timerState == TimerState.initial) {
-          return null;
-        } else {
-          context.read(timerNotifierProvider(id)).resetTimer();
-        }
-      },
-      color: buttonColor,
-      textColor: Colors.white,
-      child: Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, buttonInset, buttonInset),
-              child: Icon(Icons.replay))),
-    ));
+      return timerProgressStartedColor;
   }
 }
 
