@@ -6,23 +6,41 @@ class TimerMap extends ChangeNotifier {
 
   TimerMap(this.timerMap);
 
-  void add(UniqueKey uniqueKey, int initialDuration, {String timerLabel}) {
-    print("adding a new timer $uniqueKey");
-    timerMap[uniqueKey] = TimerNotifier(
-        uniqueKey, initialDuration, TimerState.initial,
-        timerLabel: timerLabel);
+  void add(
+      {@required UniqueKey id,
+      @required int initialDuration,
+      TimerState timerState = TimerState.initial,
+      String timerLabel,
+      String timerGroup}) {
+    print("adding a new timer $id");
+    timerMap[id] = TimerNotifier(
+        id: id,
+        initialDuration: initialDuration,
+        timerState: timerState,
+        timerLabel: timerLabel,
+        timerGroup: timerGroup);
     notifyListeners();
   }
 
-  void edit(UniqueKey uniqueKey, int newDuration) {
-    timerMap[uniqueKey] =
-        TimerNotifier(uniqueKey, newDuration, TimerState.initial);
+  void edit(
+      {@required UniqueKey id,
+      @required int initialDuration,
+      TimerState timerState = TimerState.initial,
+      String timerLabel,
+      String timerGroup}) {
+    print("Editing timer $id");
+    timerMap[id].updateTimer(TimerNotifier(
+        id: id,
+        initialDuration: initialDuration,
+        timerState: timerState,
+        timerLabel: timerLabel,
+        timerGroup: timerGroup));
     notifyListeners();
   }
 
-  void remove(UniqueKey uniqueKey) {
-    print("removing timer $uniqueKey");
-    timerMap.remove(uniqueKey);
+  void remove(UniqueKey id) {
+    print("removing timer $id");
+    timerMap.remove(id);
     notifyListeners();
   }
 }

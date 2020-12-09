@@ -47,9 +47,12 @@ class CreateTimerDialog extends StatelessWidget {
 }
 
 class CreateTimerForm extends StatefulWidget {
+  final UniqueKey id;
+  CreateTimerForm({this.id});
+
   @override
   CreateTimerFormState createState() {
-    return CreateTimerFormState();
+    return CreateTimerFormState(id: this.id);
   }
 }
 
@@ -60,11 +63,28 @@ class CreateTimerFormState extends State<CreateTimerForm> {
   final minuteEntryController = new TextEditingController();
   final secondsEntryController = new TextEditingController();
   final labelEntryController = new TextEditingController();
-  String groupName;
+  // final String groupName;
+  final UniqueKey id;
+
+  CreateTimerFormState({this.id});
 
   @override
   Widget build(BuildContext context) {
-    // Build a Form widget using the _formKey created above.
+    if (id != null) {
+      hourEntryController.text = context.read(timerNotifierProvider(id)).hours;
+      hourEntryController.selection = TextSelection(
+          baseOffset: 0, extentOffset: hourEntryController.text.length);
+      minuteEntryController.text =
+          context.read(timerNotifierProvider(id)).minutes;
+      minuteEntryController.selection = TextSelection(
+          baseOffset: 0, extentOffset: minuteEntryController.text.length);
+      secondsEntryController.text =
+          context.read(timerNotifierProvider(id)).seconds;
+      secondsEntryController.selection = TextSelection(
+          baseOffset: 0, extentOffset: secondsEntryController.text.length);
+      labelEntryController.text =
+          context.read(timerNotifierProvider(id)).timerLabel;
+    }
     return Form(
       key: _formKey,
       child: FocusScope(
@@ -77,8 +97,6 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                 width: 60,
                 child: TextFormField(
                   controller: hourEntryController,
-                  // maxLength: 2,
-                  // maxLengthEnforced: true,
                   decoration: const InputDecoration(
                       labelText: 'hr',
                       border: OutlineInputBorder(),
@@ -90,7 +108,7 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                     return validateHours(value);
                   },
                   onChanged: (value) => autoAdvance(value),
-                  onFieldSubmitted: (value) => createNewTimer(value),
+                  onFieldSubmitted: (value) => submitTimerForm(value),
                 ),
               ),
               SizedBox(width: 10),
@@ -98,13 +116,10 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                 width: 60,
                 child: TextFormField(
                   controller: minuteEntryController,
-                  // maxLength: 2,
-                  // maxLengthEnforced: true,
                   decoration: const InputDecoration(
                     labelText: 'min',
                     border: OutlineInputBorder(),
                     errorStyle: TextStyle(height: 0),
-                    // errorText: validationService.hours.error;
                   ),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   keyboardType: TextInputType.number,
@@ -113,13 +128,14 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                     return validateMinutes(value);
                   },
                   onChanged: (value) => autoAdvance(value),
-                  onFieldSubmitted: (value) => createNewTimer(value),
+                  onFieldSubmitted: (value) => submitTimerForm(value),
                 ),
               ),
               SizedBox(width: 10),
               Container(
                 width: 60,
                 child: TextFormField(
+                  autofocus: true,
                   controller: secondsEntryController,
                   // maxLength: 2,
                   // maxLengthEnforced: true,
@@ -134,24 +150,11 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                   validator: (value) {
                     return validateSeconds(value);
                   },
-                  onFieldSubmitted: (value) => createNewTimer(value),
+                  onChanged: (value) => autoFillFromSeconds(value),
+                  onFieldSubmitted: (value) => submitTimerForm(value),
                 ),
               ),
             ]),
-            // SizedBox(height: 20),
-            // Container(
-            //   width: 60,
-            //   height: 55,
-            //   // padding: EdgeInsets.only(top: 5),
-            //   child: RaisedButton(
-            //     child: Text("ADD"),
-            //     onPressed: () {
-            //       createNewTimerButton();
-            //     },
-            //     shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(20)),
-            //   ),
-            // ),
             SizedBox(height: 20),
             Container(
               width: 150,
@@ -167,7 +170,7 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.text,
-                onFieldSubmitted: (value) => createNewTimer(value),
+                onFieldSubmitted: (value) => submitTimerForm(value),
               ),
             ),
             SizedBox(height: 20),
@@ -198,7 +201,7 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                 items: [
                   DropdownMenuItem(child: Text("Default"), value: "Default")
                 ],
-                onChanged: (value) => groupName = value,
+                onChanged: (value) => print(value),
               ),
             ),
           ],
@@ -213,28 +216,47 @@ class CreateTimerFormState extends State<CreateTimerForm> {
     super.dispose();
   }
 
-  void createNewTimerButton() {
-    createNewTimer("");
-  }
-
   void autoAdvance(String value) {
     if (value.length == 2) {
-      print("length of 2, advancing");
-      _node.nextFocus();
+      _node.previousFocus();
     }
   }
 
-  void createNewTimer(String value) {
+  void autoFillFromSeconds(String value) {
+    if (value.length > 2) {
+      minuteEntryController.text += value.substring(0, 1);
+      secondsEntryController.text = value.substring(
+        1,
+      );
+      secondsEntryController.selection = TextSelection.fromPosition(
+          TextPosition(offset: secondsEntryController.text.length));
+      if (minuteEntryController.text.length > 2) {
+        hourEntryController.text += minuteEntryController.text.substring(0, 1);
+        minuteEntryController.text = minuteEntryController.text.substring(
+          1,
+        );
+      }
+    }
+  }
+
+  void submitTimerForm(String value) {
     if (_formKey.currentState.validate()) {
-      print(
-          "Creating new timer for ${hourEntryController.text}h ${minuteEntryController.text}m ${secondsEntryController.text}s");
       int totalSeconds =
           (int.tryParse(hourEntryController.text) ?? 0) * 60 * 60 +
               (int.tryParse(minuteEntryController.text) ?? 0) * 60 +
               (int.tryParse(secondsEntryController.text) ?? 0);
 
-      context.read(timerListProvider).add(UniqueKey(), totalSeconds,
-          timerLabel: labelEntryController.text.trim());
+      if (id != null) {
+        context.read(timerListProvider).edit(
+            id: id,
+            initialDuration: totalSeconds,
+            timerLabel: labelEntryController.text.trim());
+      } else {
+        context.read(timerListProvider).add(
+            id: UniqueKey(),
+            initialDuration: totalSeconds,
+            timerLabel: labelEntryController.text.trim());
+      }
       _formKey.currentState?.reset();
     } else {}
   }
@@ -245,8 +267,6 @@ class CreateTimerFormState extends State<CreateTimerForm> {
       return null;
     } else if (minuteEntryController.text.length > 0 ||
         secondsEntryController.text.length > 0) {
-      print(
-          "no hours found, but found ${minuteEntryController.text} and ${secondsEntryController.text}");
       return null;
     } else {
       return "Enter an int";
@@ -285,19 +305,8 @@ class CreateTimerFormState extends State<CreateTimerForm> {
     }
   }
 
-  String validateGroupName(String value) {
-    int intValue = int.tryParse(value);
-    if (intValue != null) {
-      return null;
-    } else if (hourEntryController.text.length > 0 ||
-        minuteEntryController.text.length > 0) {
-      return null;
-    } else {
-      return "Enter an int";
-    }
-  }
-
   void addGroup() {
+    //TODO: Add a group on the fly
     print("adding group name");
   }
 }

@@ -5,22 +5,16 @@ import 'package:yetanothertimerapp/shared/Constructors.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 import 'package:yetanothertimerapp/components/TimerItem.dart';
 
-class TimerGroup {
-  final String groupName;
-  const TimerGroup(this.groupName);
-
-  List<Widget> getTimerGroup() {
-    return [
-      TimerListHeader(groupName: groupName),
-      TimerListWidget(groupName: groupName)
-    ];
-  }
+List<Widget> getTimerGroup(String groupName) {
+  return [
+    TimerListHeader(groupName: groupName),
+    TimerListWidget(groupName: groupName)
+  ];
 }
 
 class TimerListHeader extends StatelessWidget {
   final String groupName;
-  const TimerListHeader({Key key, this.groupName = 'Default'})
-      : super(key: key);
+  const TimerListHeader({Key key, @required this.groupName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +32,7 @@ class TimerListHeader extends StatelessWidget {
 
 class TimerListWidget extends ConsumerWidget {
   final String groupName;
-  const TimerListWidget({Key key, this.groupName = 'Default'})
-      : super(key: key);
+  const TimerListWidget({Key key, @required this.groupName}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
@@ -52,7 +45,8 @@ class TimerListWidget extends ConsumerWidget {
         sliver: SliverGrid.count(
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            crossAxisCount: (MediaQuery.of(context).size.width / 375).round(),
+            crossAxisCount:
+                (MediaQuery.of(context).size.width / maxTimerItemSize).round(),
             // childAspectRatio: MediaQuery.of(context).size.width /
             //     (MediaQuery.of(context).size.height / 2),
             children: allTimersList.entries.map((t) {

@@ -6,6 +6,9 @@ import 'package:yetanothertimerapp/shared/Providers.dart';
 import 'package:yetanothertimerapp/components/CreateTimer.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
+final double buttonInset = 15.0;
+final double maxTimerItemSize = 300;
+
 class TimerItem extends StatelessWidget {
   final UniqueKey id;
   const TimerItem(this.id, {Key key}) : super(key: key);
@@ -64,7 +67,7 @@ class TimerCircularAnimation extends ConsumerWidget {
     double circleRadius = calculateDialRadius(contextWidth);
 
     print(
-        "building TimerCircularAnimation for $id with ${timeRemaining}s left");
+        "building TimerCircularAnimation for $id with ${timeRemaining}s left out of ${initialDuration}s");
 
     return CircularPercentIndicator(
       radius: circleRadius,
@@ -80,12 +83,12 @@ class TimerCircularAnimation extends ConsumerWidget {
 }
 
 double calculateDialRadius(double contextWidth) {
-  int maxTimerItemSize = 375;
   int numTimers = (contextWidth / maxTimerItemSize).round();
-  return ((contextWidth - 40) - (numTimers - 1) * 10) / numTimers - 30;
+  return ((contextWidth - 40) - (numTimers - 1) * 10) / numTimers - 50;
 }
 
 class TimerInfoContainer extends StatelessWidget {
+  //TODO: Add ability for user to select info widgets for each area
   final UniqueKey id;
   const TimerInfoContainer(this.id, {Key key}) : super(key: key);
   @override
@@ -95,8 +98,8 @@ class TimerInfoContainer extends StatelessWidget {
     double circleRadius = calculateDialRadius(contextWidth);
 
     return SizedBox(
-        height: circleRadius,
-        width: circleRadius,
+        height: circleRadius + 10,
+        width: circleRadius + 10,
         child: Container(
           margin: EdgeInsets.all(0.0),
           decoration:
@@ -111,6 +114,7 @@ class TimerInfoContainer extends StatelessWidget {
 }
 
 class TimeRemainingInfo extends ConsumerWidget {
+  //TODO: Format time remaining for clarity on timer state and consistent readability
   final UniqueKey id;
   const TimeRemainingInfo(this.id, {Key key}) : super(key: key);
   @override
@@ -126,6 +130,7 @@ class TimeRemainingInfo extends ConsumerWidget {
 }
 
 class InitialDurationInfo extends StatelessWidget {
+  //TODO: Format initial duration for clarity
   final UniqueKey id;
   const InitialDurationInfo(this.id, {Key key}) : super(key: key);
   @override
@@ -140,6 +145,7 @@ class InitialDurationInfo extends StatelessWidget {
 }
 
 class TimerLabelInfo extends StatelessWidget {
+  //TODO: Find better place for label
   final UniqueKey id;
   const TimerLabelInfo(this.id, {Key key}) : super(key: key);
   @override
@@ -155,6 +161,7 @@ class TimerLabelInfo extends StatelessWidget {
 }
 
 class TimerMoveButton extends StatelessWidget {
+  // TODO: Implement move/reorder functionality
   final UniqueKey id;
   const TimerMoveButton(this.id, {Key key}) : super(key: key);
   @override
@@ -172,7 +179,7 @@ class TimerMoveButton extends StatelessWidget {
       child: Align(
           alignment: Alignment.topLeft,
           child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 20, 0, 0),
+              padding: EdgeInsets.fromLTRB(buttonInset, buttonInset, 0, 0),
               child: Icon(Icons.drag_indicator))),
     ));
   }
@@ -192,8 +199,8 @@ class EditTimerDialog extends StatelessWidget {
       onPressed: () {},
     );
     AlertDialog alert = AlertDialog(
-      title: Text("Add a timer"),
-      content: CreateTimerForm(),
+      title: Text("Edit timer"),
+      content: CreateTimerForm(id: id),
       actions: [
         cancelButton,
         continueButton,
@@ -228,13 +235,14 @@ class TimerEditButton extends StatelessWidget {
       child: Align(
           alignment: Alignment.topRight,
           child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 20, 20, 0),
+              padding: EdgeInsets.fromLTRB(0, buttonInset, buttonInset, 0),
               child: Icon(Icons.edit))),
     ));
   }
 }
 
 Color customProgressColor(TimerState timerState) {
+  //TODO: Use theme swatch instead of constants for progress colors
   switch (timerState) {
     case TimerState.paused:
       return Colors.blueGrey;
@@ -266,7 +274,7 @@ class StartPauseButton extends ConsumerWidget {
       child: Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 0, 20),
+              padding: EdgeInsets.fromLTRB(buttonInset, 0, 0, buttonInset),
               child: Icon(playPauseIcon))),
     ));
   }
@@ -305,7 +313,7 @@ class ResetButton extends ConsumerWidget {
       child: Align(
           alignment: Alignment.bottomRight,
           child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 20, 20),
+              padding: EdgeInsets.fromLTRB(0, 0, buttonInset, buttonInset),
               child: Icon(Icons.replay))),
     ));
   }
@@ -326,21 +334,18 @@ String formattedTime(DateTime timestamp) {
 }
 
 class ETAInfo extends ConsumerWidget {
+  //TODO: Better formatting for ETA (e.g. ETA heading and +n days indicator for overflow)
   final UniqueKey id;
   ETAInfo(this.id, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     TimerState timerState = watch(timerStateProvider(id));
-    switch (timerState) {
-      case TimerState.started:
-        return Text(formattedTime(context.read(timerNotifierProvider(id)).eta),
-            style: Theme.of(context).textTheme.headline6);
-      case TimerState.finished:
-        return Text(formattedTime(context.read(timerNotifierProvider(id)).eta),
-            style: Theme.of(context).textTheme.headline6);
-      default:
-        return Text("-", style: Theme.of(context).textTheme.headline6);
+    if (timerState == TimerState.started || timerState == TimerState.finished) {
+      return Text(formattedTime(context.read(timerNotifierProvider(id)).eta),
+          style: Theme.of(context).textTheme.headline6);
+    } else {
+      return Text("-", style: Theme.of(context).textTheme.headline6);
     }
   }
 }

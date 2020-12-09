@@ -7,8 +7,10 @@ final timerListProvider = ChangeNotifierProvider<TimerMap>((ref) {
   UniqueKey timer1Key = UniqueKey();
   UniqueKey timer2Key = UniqueKey();
   return TimerMap({
-    timer1Key: TimerNotifier(timer1Key, 20, TimerState.initial),
-    timer2Key: TimerNotifier(timer2Key, 45, TimerState.initial)
+    timer1Key: TimerNotifier(
+        id: timer1Key, initialDuration: 20, timerState: TimerState.initial),
+    timer2Key: TimerNotifier(
+        id: timer2Key, initialDuration: 45, timerState: TimerState.initial)
   });
 });
 
@@ -28,6 +30,11 @@ final _timerNotifierProvider =
 final timerNotifierProvider = StateNotifierProvider.autoDispose
     .family<TimerNotifier, UniqueKey>((ref, id) {
   return ref.watch(_timerNotifierProvider(id));
+});
+
+final timerProvider =
+    Provider.autoDispose.family<TimerNotifier, UniqueKey>((ref, id) {
+  return ref.watch(timerNotifierProvider(id));
 });
 
 final _timeRemainingProvider =

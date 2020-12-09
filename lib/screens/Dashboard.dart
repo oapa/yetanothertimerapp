@@ -19,7 +19,7 @@ class Dashboard extends StatelessWidget {
       body: CustomScrollView(slivers: <Widget>[
         // QuickAddTimerSliver(),
         // const SummaryBar(),
-        ...TimerGroup('Default').getTimerGroup(),
+        ...getTimerGroup('Default'),
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
