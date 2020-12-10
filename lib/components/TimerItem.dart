@@ -161,30 +161,30 @@ class TimerLabelInfo extends StatelessWidget {
   }
 }
 
-class EditTimerDialog extends StatelessWidget {
-  final UniqueKey id;
-  const EditTimerDialog(this.id, {Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
-      onPressed: () {},
-    );
-    Widget continueButton = FlatButton(
-      child: Text("Continue"),
-      onPressed: () {},
-    );
-    AlertDialog alert = AlertDialog(
-      title: Text("Edit timer"),
-      content: CreateTimerForm(id: id),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-    return alert;
-  }
-}
+// class EditTimerDialog extends StatelessWidget {
+//   final UniqueKey id;
+//   const EditTimerDialog(this.id, {Key key}) : super(key: key);
+//   @override
+//   Widget build(BuildContext context) {
+//     Widget cancelButton = FlatButton(
+//       child: Text("Cancel"),
+//       onPressed: () {},
+//     );
+//     Widget continueButton = FlatButton(
+//       child: Text("Continue"),
+//       onPressed: () {},
+//     );
+//     AlertDialog alert = AlertDialog(
+//       title: Text("Edit timer"),
+//       content: CreateTimerForm(id),
+//       actions: [
+//         cancelButton,
+//         continueButton,
+//       ],
+//     );
+//     return alert;
+//   }
+// }
 
 Color customProgressColor(TimerState timerState) {
   //TODO: Use theme swatch instead of constants for progress colors

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 /* Overall Theme */
 
 /* Timer Group */
-double timerGroupPadding = 20;
-double timerGridSpacing = 10;
+final Color timerGroupHeaderColor = Colors.blue;
+final double timerGroupHeaderHeight = 30;
+final double timerGroupPadding = 20;
+final double timerGridSpacing = 10;
 /* Timer Item */
 final double maxTimerItemSize = 300;
 /* Timer Buttons */

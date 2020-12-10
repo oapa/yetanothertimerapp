@@ -72,7 +72,11 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     hours = (initialDuration / 3600).floor().toString();
     minutes = ((initialDuration % 3600) / 60).floor().toString();
     seconds = (initialDuration % 60).toString();
-    state = TimerModel(timeRemaining: initialDuration, timerState: timerState);
+    if (timerState == TimerState.started) {
+      startTimer();
+    } else {
+      resetTimer();
+    }
   }
 }
 

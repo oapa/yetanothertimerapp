@@ -26,7 +26,7 @@ class Dashboard extends StatelessWidget {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return CreateTimerDialog();
+              return CreateTimerDialog(UniqueKey());
             },
           );
         },

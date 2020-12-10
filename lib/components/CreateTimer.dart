@@ -4,40 +4,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yetanothertimerapp/shared/Providers.dart';
 import 'package:yetanothertimerapp/shared/Constructors.dart';
 
-class QuickAddTimerSliver extends StatelessWidget {
-  QuickAddTimerSliver({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverPersistentHeader(
-        pinned: true,
-        delegate: SliverAppBarDelegate(
-            minHeight: 125.0,
-            maxHeight: 125.0,
-            child: Container(
-              color: Colors.blue[50],
-              padding: EdgeInsets.fromLTRB(15, 20, 20, 15),
-              child: CreateTimerForm(),
-            )));
-  }
-}
-
 class CreateTimerDialog extends StatelessWidget {
   final UniqueKey id;
-  const CreateTimerDialog({Key key, this.id}) : super(key: key);
+  final bool edit;
+  const CreateTimerDialog(this.id, {Key key, this.edit = false})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     Widget cancelButton = FlatButton(
       child: Text("Cancel"),
-      onPressed: () {},
+      onPressed: () {
+        Navigator.pop(context);
+      },
     );
     Widget continueButton = FlatButton(
       child: Text("Continue"),
       onPressed: () {},
     );
     AlertDialog alert = AlertDialog(
-      title: Text("Add a timer"),
-      content: CreateTimerForm(id: id),
+      titlePadding: EdgeInsets.only(left: 24, bottom: 10),
+      title: Stack(children: [
+        Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+                padding: EdgeInsets.only(top: 10),
+                alignment: Alignment.topRight,
+                height: 50,
+                width: 50,
+                child: FlatButton(
+                  child: Icon(Icons.cancel),
+                  onPressed: () => Navigator.pop(context),
+                ))),
+        Padding(padding: EdgeInsets.only(top: 24), child: Text("Add a timer"))
+      ]),
+      content: CreateTimerForm(id, edit: edit),
       actions: [
         cancelButton,
         continueButton,
@@ -49,11 +50,12 @@ class CreateTimerDialog extends StatelessWidget {
 
 class CreateTimerForm extends StatefulWidget {
   final UniqueKey id;
-  CreateTimerForm({this.id});
+  final bool edit;
+  CreateTimerForm(this.id, {this.edit = false});
 
   @override
   CreateTimerFormState createState() {
-    return CreateTimerFormState(id: this.id);
+    return CreateTimerFormState(this.id, this.edit);
   }
 }
 
@@ -66,23 +68,23 @@ class CreateTimerFormState extends State<CreateTimerForm> {
   final labelEntryController = new TextEditingController();
   // final String groupName;
   final UniqueKey id;
+  final bool edit;
 
-  CreateTimerFormState({this.id});
+  CreateTimerFormState(this.id, this.edit);
 
   @override
   Widget build(BuildContext context) {
-    if (id != null) {
-      hourEntryController.text = context.read(timerNotifierProvider(id)).hours;
-      hourEntryController.selection = TextSelection(
-          baseOffset: 0, extentOffset: hourEntryController.text.length);
+    if (edit) {
+      String oldHours = context.read(timerNotifierProvider(id)).hours;
+      String oldMinutes = context.read(timerNotifierProvider(id)).minutes;
+      String oldSeconds = context.read(timerNotifierProvider(id)).seconds;
+      hourEntryController.text = (int.tryParse(oldHours) > 0) ? oldHours : '';
       minuteEntryController.text =
-          context.read(timerNotifierProvider(id)).minutes;
-      minuteEntryController.selection = TextSelection(
-          baseOffset: 0, extentOffset: minuteEntryController.text.length);
+          (int.tryParse(oldMinutes) > 0) ? oldMinutes : '';
       secondsEntryController.text =
-          context.read(timerNotifierProvider(id)).seconds;
-      secondsEntryController.selection = TextSelection(
-          baseOffset: 0, extentOffset: secondsEntryController.text.length);
+          (int.tryParse(oldSeconds) > 0) ? oldSeconds : '';
+      secondsEntryController.selection = TextSelection.fromPosition(
+          TextPosition(offset: secondsEntryController.text.length));
       labelEntryController.text =
           context.read(timerNotifierProvider(id)).timerLabel;
     }
@@ -108,7 +110,7 @@ class CreateTimerFormState extends State<CreateTimerForm> {
                   validator: (value) {
                     return validateHours(value);
                   },
-                  onChanged: (value) => autoAdvance(value),
+                  // onChanged: (value) => autoAdvance(value),
                   onFieldSubmitted: (value) => submitTimerForm(value),
                 ),
               ),
@@ -229,8 +231,6 @@ class CreateTimerFormState extends State<CreateTimerForm> {
       secondsEntryController.text = value.substring(
         1,
       );
-      secondsEntryController.selection = TextSelection.fromPosition(
-          TextPosition(offset: secondsEntryController.text.length));
       if (minuteEntryController.text.length > 2) {
         hourEntryController.text += minuteEntryController.text.substring(0, 1);
         minuteEntryController.text = minuteEntryController.text.substring(
@@ -238,6 +238,30 @@ class CreateTimerFormState extends State<CreateTimerForm> {
         );
       }
     }
+    if (value.length == 1 && (minuteEntryController.text.length > 0)) {
+      secondsEntryController.text = minuteEntryController.text
+              .substring(minuteEntryController.text.length - 1) +
+          secondsEntryController.text;
+      if (minuteEntryController.text.length == 1) {
+        minuteEntryController.text = '';
+      } else if (minuteEntryController.text.length == 2) {
+        minuteEntryController.text = minuteEntryController.text
+            .substring(0, minuteEntryController.text.length - 1);
+        if (hourEntryController.text.length == 1) {
+          minuteEntryController.text =
+              hourEntryController.text + minuteEntryController.text;
+          hourEntryController.text = '';
+        } else if (hourEntryController.text.length >= 2) {
+          minuteEntryController.text = hourEntryController.text
+                  .substring(hourEntryController.text.length - 1) +
+              minuteEntryController.text;
+          hourEntryController.text = hourEntryController.text
+              .substring(0, hourEntryController.text.length - 1);
+        }
+      }
+    }
+    secondsEntryController.selection = TextSelection.fromPosition(
+        TextPosition(offset: secondsEntryController.text.length));
   }
 
   void submitTimerForm(String value) {
@@ -246,8 +270,7 @@ class CreateTimerFormState extends State<CreateTimerForm> {
           (int.tryParse(hourEntryController.text) ?? 0) * 60 * 60 +
               (int.tryParse(minuteEntryController.text) ?? 0) * 60 +
               (int.tryParse(secondsEntryController.text) ?? 0);
-
-      if (id != null) {
+      if (edit) {
         context.read(timerListProvider).edit(
             id: id,
             initialDuration: totalSeconds,

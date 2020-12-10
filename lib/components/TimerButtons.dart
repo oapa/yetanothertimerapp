@@ -1,11 +1,8 @@
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:yetanothertimerapp/shared/Providers.dart';
 import 'package:yetanothertimerapp/shared/UISettings.dart';
 import 'package:yetanothertimerapp/components/CreateTimer.dart';
-import 'package:yetanothertimerapp/components/TimerButtons.dart';
 import 'package:yetanothertimerapp/components/TimerNotifier.dart';
 
 class TimerMoveButton extends StatelessWidget {
@@ -49,7 +46,7 @@ class TimerEditButton extends StatelessWidget {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return CreateTimerDialog(id: id);
+            return CreateTimerDialog(id, edit: true);
           },
         );
       },

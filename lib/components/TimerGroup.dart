@@ -22,10 +22,11 @@ class TimerListHeader extends StatelessWidget {
     return SliverPersistentHeader(
       pinned: true,
       delegate: SliverAppBarDelegate(
-        minHeight: 30.0,
-        maxHeight: 30.0,
+        minHeight: timerGroupHeaderHeight,
+        maxHeight: timerGroupHeaderHeight,
         child: Container(
-            color: Colors.blue, child: Center(child: Text("$groupName"))),
+            color: timerGroupHeaderColor,
+            child: Center(child: Text("$groupName"))),
       ),
     );
   }
